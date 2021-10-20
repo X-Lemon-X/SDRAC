@@ -26,7 +26,7 @@ namespace SDRAC.Classes
          * id = 4, shortMsg = "Send() Error", 
          * id = 5, shortMsg = "Start() Error/Setings
          * id = 6, shortMsg = "Start() Error/Begining"
-         * 
+         * id = 7, shortMsg = "localIp = null"
          * id = 10, shortMsg = "Couldn't set local Ip!"
          * id = 11, shortMsg = "No network connection!"
          * 
@@ -35,7 +35,8 @@ namespace SDRAC.Classes
         #endregion
 
         #region Objects
-        public Thread readLW, sendLW = null;
+        public Thread readLW, sendLW = null, threadListen=null;
+        public Thread[] threadConnections = null;
         public TcpClient tcpClient = null;
         public static Socket socketCon = null;
         public NetworkStream stream = null;
@@ -43,9 +44,11 @@ namespace SDRAC.Classes
         public List<Command> cListIn = null;
         public List<ErrorClass> cListErrors = null;
         public List<int> idListIn = null, idListOut = null;
+        public List<ConnectionData> connectedDevicesL = null;
+
         public event EventHandler<Command> NewDataIncomeEvent;
         public event EventHandler<ErrorClass> ErrorIncomingEvent;
-        public event EventHandler<bool> ConnectionStatusChangedEvent; 
+        public event EventHandler<bool> ConnectionStatusChangedEvent;
 
         private static Mutex mutexAdd = new Mutex(), mutexRead = new Mutex();
         #endregion
@@ -241,11 +244,11 @@ namespace SDRAC.Classes
 
         public class ConnectionData
         {
-            string _ip=null;
-            int _portPrivate=0;
+            public string _ip=null;
+            public int _portPrivate =0;
             bool connected = false;
             public TcpClient tcpClient = null;
-            public static Socket socketCon = null;
+            public static Socket sc = null;
             public NetworkStream stream = null;
             public List<Command> cListOut = null;
             public List<Command> cListIn = null;
@@ -343,6 +346,7 @@ namespace SDRAC.Classes
 
         public int EasySetup(SetupSerwer ss)
         {
+            connectedDevicesL = new List<ConnectionData>();
             maxSizeOfOneMessage = ss._msgMaxSize;
             receiveBufferSize = ss._msgMaxSize * 64;
             bufferSize = 2 * ss._msgMaxSize;
@@ -365,63 +369,115 @@ namespace SDRAC.Classes
             try
             {
                 Stop();
-                cListOut = new List<Command>();
-                cListIn = new List<Command>();
-                cListErrors = new List<ErrorClass>();
-                communicatsRecived = 0;
-                notAcknowledgeRecived = 0;
-                acknowledgeRecived = 0; 
-                passedCommunicats = 0;
-
-                if (NetworkInterface.GetIsNetworkAvailable())
-                {
-                    if (localIp != null)
-                    {
-
-                        try
-                        {
-                            if (socketCon != null) if (socketCon.Connected) socketCon.Close();
-
-                            socketCon = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
-                            socketCon.ReceiveBufferSize = receiveBufferSize;
-                            socketCon.ReceiveTimeout = reciveTimeout;
-                            socketCon.SendTimeout = sendTimeout;
-                            socketCon.Connect(hostIp, defaultPort);
-
-                            readingLanWifi = false;
-
-                            if (readLW != null) if (readLW.IsAlive) readLW.Join();
-                            if (sendLW != null) if (sendLW.IsAlive) sendLW.Join();
-
-                            readingLanWifi = true;
-                            readLW = new Thread(new ThreadStart(ReadHandler));
-                            sendLW = new Thread(new ThreadStart(SendHendler));
-                            readLW.Start();
-                            sendLW.Start();
-                            
-                            return 0;
-
-                        }
-                        catch (Exception ex) { cListErrors.Add(new ErrorClass() { id = 5, shortMsg = "Start() Error/Setings", longMsg = ex.ToString() }); }
-
-
-                    }
-                    else MessageBox.Show("No Connection.", "Network Problem", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                }
-                else AddError(new ErrorClass() { id = 11, shortMsg = "No network connection!" });
+                if (SerwerOrClient) return SetSerwer();
+                else return SetClient();  
             }
-            catch (Exception ex) { cListErrors.Add(new ErrorClass() { id = 6, shortMsg = "Start() Error/Begining", longMsg = ex.ToString() }); }
+            catch (Exception ex) { AddError(new ErrorClass() { id = 6, shortMsg = "Start() Error/Begining", longMsg = ex.ToString() }); }
+
+            return -2;
+        }
+
+        private int SetSerwer()
+        {
+            if (NetworkInterface.GetIsNetworkAvailable())
+            {
+                if (localIp != null)
+                {
+                    try
+                    {
+                        connectedDevicesL = new List<ConnectionData>();
+
+                        if (socketCon != null) if (socketCon.Connected) socketCon.Close();
+
+                        socketCon = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
+                        socketCon.ReceiveBufferSize = receiveBufferSize;
+                        socketCon.ReceiveTimeout = reciveTimeout;
+                        socketCon.SendTimeout = sendTimeout;                     
+
+                        readingLanWifi = false;
+                        foreach (var item in threadConnections)
+                        {
+                            if (item != null) if (item.IsAlive){  item.Abort();}
+                        }
+                        if (threadListen != null) if (readLW.IsAlive) readLW.Abort();
+
+                        readingLanWifi = true;
+
+                        readLW = new Thread(new ThreadStart(ReadHandler));
+                        readLW.Start();
+
+                        return 1;
+                    }
+                    catch (Exception ex) { AddError(new ErrorClass() { id = 5, shortMsg = "Start() Error/Setings", longMsg = ex.ToString() }); }
+                }
+                else AddError(new ErrorClass() { id = 7, shortMsg = "LoclaIp=null" });
+            }
+            else AddError(new ErrorClass() { id = 11, shortMsg = "No network connection!" });
+            return -1;
+        }
+
+        private int SetClient()
+        {
+            if (NetworkInterface.GetIsNetworkAvailable())
+            {
+                if (localIp != null)
+                {
+                    try
+                    {
+                        cListOut = new List<Command>();
+                        cListIn = new List<Command>();
+                        cListErrors = new List<ErrorClass>();
+                        communicatsRecived = 0;
+                        notAcknowledgeRecived = 0;
+                        acknowledgeRecived = 0;
+                        passedCommunicats = 0;
+
+                        if (socketCon != null) if (socketCon.Connected) socketCon.Close();
+
+                        socketCon = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
+                        socketCon.ReceiveBufferSize = receiveBufferSize;
+                        socketCon.ReceiveTimeout = reciveTimeout;
+                        socketCon.SendTimeout = sendTimeout;
+                        socketCon.Connect(hostIp, defaultPort);
+
+                        readingLanWifi = false;
+
+                        if (readLW != null) if (readLW.IsAlive) readLW.Join();
+                        if (sendLW != null) if (sendLW.IsAlive) sendLW.Join();
+
+                        readingLanWifi = true;
+                        readLW = new Thread(new ThreadStart(ReadHandler));
+                        sendLW = new Thread(new ThreadStart(SendHendler));
+                        readLW.Start();
+                        sendLW.Start();
+
+                        return 1;
+                    }
+                    catch (Exception ex) { AddError(new ErrorClass() { id = 5, shortMsg = "Start() Error/Setings", longMsg = ex.ToString() }); }
+                }
+                else AddError(new ErrorClass() { id = 7, shortMsg = "LoclaIp=null" });
+            }
+            else AddError(new ErrorClass() { id = 11, shortMsg = "No network connection!" });
 
             return -1;
         }
+
         public int Stop()
         {
             readingLanWifi = false;
             try
             {
-                if (readLW != null) if (readLW.IsAlive) readLW.Join();
-                if (sendLW != null) if (sendLW.IsAlive) sendLW.Join();
-                return 0;
+                if (SerwerOrClient)
+                { 
+                
+                }
+                else
+                {
+                    if (readLW != null) if (readLW.IsAlive) readLW.Join();
+                    if (sendLW != null) if (sendLW.IsAlive) sendLW.Join();
+                    if(socketCon!=null)socketCon.Close();
+                }
+                    return 0;
             }
             catch (Exception)
             {
@@ -550,6 +606,92 @@ namespace SDRAC.Classes
         #endregion
 
         #region Privates
+
+        private void ListenHandler()
+        {
+            Command cm, _notA = new Command(), _ack = new Command(), _portC = new Command();
+            _notA.CreateNew(29, true);
+            _ack.CreateNew(25, true);
+            IPAddress hp = (Dns.Resolve(IPAddress.Any.ToString())).AddressList[0];
+            IPEndPoint ep = new IPEndPoint(hp, defaultPort);
+            socketCon.Bind(ep);
+            bool read = true;
+            while (readingLanWifi)
+            {
+                try
+                {
+                    byte[] buffer = new byte[receiveBufferSize];
+                    try { int g = socketCon.Receive(buffer); read = true; } catch (Exception) { read = false; }
+                    int p = 0;
+                    if (read)
+                    foreach (byte item in buffer)
+                    {
+                        if (item == (byte)'@')
+                        {
+                            //data (a) - 8 * a bit   [] - a few bits  -->  @ (number of bytes)  G (code)    [data]       #  <--
+                            //bytes                   bits = b                             0    1   <b + 3 ;b-2>   b-1    
+                            // Data Look (number)bl => (number of bytes)
+                            // @  R|M (3nb size) (2nb msgNumber) G (2 nb code) [data] #
+
+                            int size = BytesToInt(ByteArrayCutter(buffer, p + 2, 3));
+                            if (size <= maxSizeOfOneMessage)
+                            {
+                                byte[] data = ByteArrayCutter(buffer, p, size + 5);
+                                cm = new Command();
+
+                                communicatsRecived++;
+
+                                mutexRead.WaitOne();
+                                if (cm.DecomposeCommand(data) >= 0)
+                                {
+                                    connected = true;
+                                    passedCommunicats++;
+
+                                    if (cm.code == 25 && cm.id == msgIdAck)
+                                    {
+                                        ack = true; acknowledgeRecived++;
+                                    }
+                                    else if (cm.code == 29 && cm.id == 0)
+                                    {
+                                        notAck = true; notAcknowledgeRecived++;
+                                    }
+                                    else if(cm.code == 10)
+                                    {
+                                        int portCheck = 25001;
+                                        if (connectedDevicesL.Count != 0)
+                                        while (true)
+                                        {
+                                            var list = connectedDevicesL.Find( e => e._portPrivate == portCheck);
+                                            if (list != null) break;
+                                            portCheck++;
+                                            if (portCheck > 65535) portCheck = 25001;
+                                        }
+
+
+                                        Send(socketCon,_portC,0);
+                                        
+                                    }
+                                    else
+                                    {
+                                        Send(socketCon, _ack, cm.id);
+                                        cListIn.Add(cm);
+                                        NewDataIncomeEvent?.Invoke(this, cm);    // ?  robi sprawdzenie czy ivent nie jest null
+                                                                                    //CommandTrigger.Invoke();
+                                    }
+                                }
+                                else { Send(socketCon, _notA, 0); }
+                            }
+                        }
+                        p++;
+                    }
+                }
+                catch (Exception ex)
+                {AddError(new ErrorClass() { id = 3, shortMsg = "ListenHandler() Error", longMsg = ex.ToString() });}
+            }
+
+            socketCon.Close();
+        }
+
         private void ReadHandler()
         {
             Stopwatch sw = new Stopwatch();
@@ -557,7 +699,6 @@ namespace SDRAC.Classes
             Command cm, _notA = new Command(), _ack = new Command();
             _notA.CreateNew(29,true);
             _ack.CreateNew(25,true);
-
             int[] empty ={0};
 
             while (readingLanWifi)
@@ -591,29 +732,29 @@ namespace SDRAC.Classes
                                 if (cm.DecomposeCommand(data) >= 0)
                                 {
                                     connected = true;
-
                                     passedCommunicats++;
-                                    if (cm.code == 29 || cm.code == 25)
+
+                                    if (cm.code == 25 && cm.id == msgIdAck)
                                     {
-                                        if (cm.id == msgIdAck)
-                                        {
-                                            if (cm.code == 29) { ack = true; acknowledgeRecived++; }
-                                            else { notAck = true; notAcknowledgeRecived++; }
-                                        }
-                                        else
-                                        {
-                                           AddError(new ErrorClass() { id = 9, command = cm, shortMsg = "Id not confirmed!", longMsg = "in=>" + cm.id.ToString() + "   out=>" + msgIdAck.ToString() });
-                                        }
+                                        ack = true; acknowledgeRecived++;
                                     }
+                                    else if (cm.code == 29 && cm.id==0)
+                                    {
+                                        notAck = true; notAcknowledgeRecived++;
+                                    }
+                                    else if(cm.code == 25 && cm.id != msgIdAck)
+                                    {
+                                        AddError(new ErrorClass() { id = 9, command = cm, shortMsg = "Id not confirmed!", longMsg = "in=>" + cm.id.ToString() + "   out=>" + msgIdAck.ToString() });
+                                    }        
                                     else
                                     {
-                                        Send(_ack, cm.id);
+                                        Send(socketCon,_ack, cm.id);
                                         cListIn.Add(cm);
                                         NewDataIncomeEvent?.Invoke(this,cm);    // ?  robi sprawdzenie czy ivent nie jest null
                                         //CommandTrigger.Invoke();
                                     }
                                 }
-                                else { Send(_notA, 0); }
+                                else { Send(socketCon,_notA, 0); }
                                 mutexRead.ReleaseMutex();
 
                                 sw.Restart();
@@ -654,7 +795,7 @@ namespace SDRAC.Classes
                     mutexRead.WaitOne();
 
                     if (tAlive.ElapsedMilliseconds >= sendTimeout)
-                    { id++; Send(aliveC, id); msgIdAck = id; tAlive.Restart(); }
+                    { id++; Send(socketCon, aliveC, id); msgIdAck = id; tAlive.Restart(); }
 
                     connected = true;
                     if (connected)
@@ -673,7 +814,7 @@ namespace SDRAC.Classes
                         if ((!wait || notAck || elap) && currentCm != null)
                         {
                             id++;
-                            Send(currentCm, id);
+                            Send(socketCon,currentCm, id);
                             msgIdAck = id;
 
                             timer.Restart();
@@ -720,11 +861,11 @@ namespace SDRAC.Classes
                 catch (Exception ex) { AddError(new ErrorClass() { id = 2, shortMsg = "SendHandler() Error", longMsg = ex.ToString() }); }
             }
         }
-        private void Send(Command cm, int id)
+        private void Send(Socket sc,Command cm, int id)
         {
             try
             {
-                socketCon.Send(cm.Compose(id), cm.fullSize, SocketFlags.None);
+                sc.Send(cm.Compose(id), cm.fullSize, SocketFlags.None);
             }
             catch (Exception ex) { AddError(new ErrorClass() { id = 4, shortMsg = "Send() Error", longMsg = ex.ToString() }); }
         }

@@ -666,10 +666,7 @@ namespace SDRAC.Classes
                                             portCheck++;
                                             if (portCheck > 65535) portCheck = 25001;
                                         }
-
-
                                         Send(socketCon,_portC,0);
-                                        
                                     }
                                     else
                                     {

@@ -3545,12 +3545,12 @@ namespace SDRAC
             MainMenuForm.dataClass.GetConInfo = e;
         }
 
-        private void SimpleLan_ErrorIncomingEvent(object sender, Classes.SimpleLan.ErrorClass e)
+        private void SimpleLan_ErrorIncomingEvent(object sender,int id, Classes.SimpleLan.ErrorClass e)
         {
             errorListNumerous.Add(e);
         }
 
-        private void SimpleLan_NewDataIncomeEvent(object sender, Classes.SimpleLan.Command cm)
+        private void SimpleLan_NewDataIncomeEvent(object sender,int id, Classes.SimpleLan.Command cm)
         {
             QueueInUpgraded(cm);
         }

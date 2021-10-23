@@ -44,7 +44,7 @@ namespace SDRAC.Classes
         public List<Command> cListIn = null;
         public List<ErrorClass> cListErrors = null;
         public List<int> idListIn = null, idListOut = null;
-        public List<ConnectionData> connectedDevicesL = null;
+        public List<ConnectionData> cdl = null;
 
         public event EventHandler<Command> NewDataIncomeEvent;
         public event EventHandler<ErrorClass> ErrorIncomingEvent;
@@ -206,12 +206,14 @@ namespace SDRAC.Classes
             }
 
         }
+
         public class ErrorClass
         {
             public int id = 0;
             public string shortMsg = null, longMsg = null, time=null;
             public Command command = null;
             public DateTime datatime;
+            public ConnectionData connectionData=null;
 
             public string SetCurrentTime()
             {
@@ -245,8 +247,8 @@ namespace SDRAC.Classes
         public class ConnectionData
         {
             public string _ip=null;
-            public int _portPrivate =0;
-            bool connected = false;
+            public int _portPrivate =0, id=-1,code = 0, msgIdAck=0;
+            public bool connected = false, working=false,ack, notAck, connectedLastState=false;
             public TcpClient tcpClient = null;
             public static Socket sc = null;
             public NetworkStream stream = null;
@@ -254,7 +256,8 @@ namespace SDRAC.Classes
             public List<Command> cListIn = null;
             public List<ErrorClass> cListErrors = null;
             public List<int> idListIn = null, idListOut = null;
-
+            public static Mutex mutexAdd = new Mutex(), mutexRead = new Mutex();
+            
         }
 
         public class SetupClient
@@ -377,6 +380,30 @@ namespace SDRAC.Classes
             return -2;
         }
 
+        public int Stop()
+        {
+            readingLanWifi = false;
+            try
+            {
+                if (SerwerOrClient)
+                { 
+                
+                }
+                else
+                {
+                    if (readLW != null) if (readLW.IsAlive) readLW.Join();
+                    if (sendLW != null) if (sendLW.IsAlive) sendLW.Join();
+                    if(socketCon!=null)socketCon.Close();
+                }
+                    return 0;
+            }
+            catch (Exception)
+            {
+
+                return-1;
+            }
+        }
+
         private int SetSerwer()
         {
             if (NetworkInterface.GetIsNetworkAvailable())
@@ -385,25 +412,33 @@ namespace SDRAC.Classes
                 {
                     try
                     {
-                        connectedDevicesL = new List<ConnectionData>();
-
-                        if (socketCon != null) if (socketCon.Connected) socketCon.Close();
-
-                        socketCon = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
-                        socketCon.ReceiveBufferSize = receiveBufferSize;
-                        socketCon.ReceiveTimeout = reciveTimeout;
-                        socketCon.SendTimeout = sendTimeout;                     
-
                         readingLanWifi = false;
+                        
+                        int connectedDev = 0;
                         foreach (var item in threadConnections)
                         {
-                            if (item != null) if (item.IsAlive){  item.Abort();}
+                            if (item != null)
+                            if (item.IsAlive)
+                            { 
+                               if( connectedDevicesL!=null) if(connectedDev < connectedDevicesL.Count)
+                                  { connectedDevicesL[connectedDev].working = false; item.Join();}
+                               else item.Abort();                            
+                            }
                         }
                         if (threadListen != null) if (readLW.IsAlive) readLW.Abort();
 
-                        readingLanWifi = true;
 
-                        readLW = new Thread(new ThreadStart(ReadHandler));
+                        if (socketCon != null) if (socketCon.Connected) socketCon.Close();
+                        socketCon = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
+                        socketCon.ReceiveBufferSize = receiveBufferSize;
+                        socketCon.ReceiveTimeout = reciveTimeout;
+                        socketCon.SendTimeout = sendTimeout; 
+
+                        connectedDevicesL.Clear();
+                        connectedDevicesL = new List<ConnectionData>();
+
+                        readingLanWifi = true;
+                        readLW = new Thread(new ThreadStart(ListenSerwerHandler));
                         readLW.Start();
 
                         return 1;
@@ -462,29 +497,28 @@ namespace SDRAC.Classes
             return -1;
         }
 
-        public int Stop()
-        {
-            readingLanWifi = false;
-            try
-            {
-                if (SerwerOrClient)
-                { 
-                
-                }
-                else
-                {
-                    if (readLW != null) if (readLW.IsAlive) readLW.Join();
-                    if (sendLW != null) if (sendLW.IsAlive) sendLW.Join();
-                    if(socketCon!=null)socketCon.Close();
-                }
-                    return 0;
+        private int StopSerwer()
+        { 
+            return 1;
+        }
+
+        private int StopClient()
+        { 
+            try 
+            {	        
+		        if (readLW != null) if (readLW.IsAlive) readLW.Join();
+                if (sendLW != null) if (sendLW.IsAlive) sendLW.Join();
+                if(socketCon!=null)socketCon.Close();
+                return 1;
             }
             catch (Exception)
             {
 
-                return-1;
+	           return -1;
             }
+         
         }
+      
         #endregion
 
         #region Public
@@ -605,9 +639,9 @@ namespace SDRAC.Classes
         }
         #endregion
 
-        #region Privates
+        #region Private
 
-        private void ListenHandler()
+        private void ListenSerwerHandler()
         {
             Command cm, _notA = new Command(), _ack = new Command(), _portC = new Command();
             _notA.CreateNew(29, true);
@@ -771,8 +805,10 @@ namespace SDRAC.Classes
             connected = false;
 
         }
-        private void SendHendler()
+
+        private void SendHendler(int idConnection)
         {
+            ConnectionData cd = connectedDevicesL[id];
             Stopwatch timer = Stopwatch.StartNew(), tAlive = Stopwatch.StartNew();
             Command aliveC = new Command(), currentCm = null;
             aliveC.CreateNew(8, false);
@@ -780,12 +816,12 @@ namespace SDRAC.Classes
             int counter = 0;
             bool wait = false, elap = false;
             long elapsed;
-            int id = msgIdAck;
+            int id = cd.msgIdAck;
 
             timer.Reset();
             tAlive.Restart();
 
-            while (readingLanWifi)
+            while (cd.working)
             {
                 try
                 {  
@@ -858,6 +894,7 @@ namespace SDRAC.Classes
                 catch (Exception ex) { AddError(new ErrorClass() { id = 2, shortMsg = "SendHandler() Error", longMsg = ex.ToString() }); }
             }
         }
+
         private void Send(Socket sc,Command cm, int id)
         {
             try
@@ -866,6 +903,7 @@ namespace SDRAC.Classes
             }
             catch (Exception ex) { AddError(new ErrorClass() { id = 4, shortMsg = "Send() Error", longMsg = ex.ToString() }); }
         }
+
         private int AddQueue(Command dataAdd)
         {
             if(dataAdd != null)
@@ -879,6 +917,7 @@ namespace SDRAC.Classes
 
             return -1;
         }
+
         private void AddError(ErrorClass er)
         {
             if (er != null)

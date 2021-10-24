@@ -14,8 +14,6 @@ using System.Windows.Media.Media3D;
 using System.Xml;
 using FontAwesome.Sharp;
 
-
-
 namespace SDRAC
 {
     public partial class MainMenuForm : Form
@@ -1761,6 +1759,7 @@ namespace SDRAC
                         try
                         {
                             var a = ErrorExplenationRobot(ec,false);
+                            if (listBoxErrorList.Items.Count > 30) listBoxErrorList.Items.Clear();
                             listBoxErrorList.Items.Add(a);
                             if (listBoxErrorList.Items.Count > 1) listBoxErrorList.SelectedIndex = listBoxErrorList.Items.Count - 1;
                         }
@@ -3532,7 +3531,9 @@ namespace SDRAC
         {
             errorListNumerous = new List<Classes.SimpleLan.ErrorClass>();
             simpleLan = new Classes.SimpleLan();
-            simpleLan.EasySetup(64,60,25000,MainMenuForm.dataClass.Ip);
+            simpleLan.EasySetup(128,150,25000,MainMenuForm.dataClass.Ip);
+            simpleLan.EventClassReturnHandler += SimpleLan_EventClassReturnHandler;
+
             simpleLan.NewDataIncomeEvent += SimpleLan_NewDataIncomeEvent;
             simpleLan.ErrorIncomingEvent += SimpleLan_ErrorIncomingEvent;
             simpleLan.ConnectionStatusChangedEvent += SimpleLan_ConnectionStatusChangedEvent;
@@ -3540,17 +3541,24 @@ namespace SDRAC
 
         }
 
+        private void SimpleLan_EventClassReturnHandler(object sender, Classes.SimpleLan.EventClassReturn e)
+        {
+            if (e._command != null) QueueInUpgraded(e._command);
+            else if (e._errorClass != null) errorListNumerous.Add(e._errorClass);
+            else if (e._connection) MainMenuForm.dataClass.GetConInfo = e._connected;
+        }
+
         private void SimpleLan_ConnectionStatusChangedEvent(object sender, bool e)
         {
             MainMenuForm.dataClass.GetConInfo = e;
         }
 
-        private void SimpleLan_ErrorIncomingEvent(object sender,int id, Classes.SimpleLan.ErrorClass e)
+        private void SimpleLan_ErrorIncomingEvent(object sender, Classes.SimpleLan.ErrorClass e)
         {
             errorListNumerous.Add(e);
         }
 
-        private void SimpleLan_NewDataIncomeEvent(object sender,int id, Classes.SimpleLan.Command cm)
+        private void SimpleLan_NewDataIncomeEvent(object sender, Classes.SimpleLan.Command cm)
         {
             QueueInUpgraded(cm);
         }
@@ -3625,8 +3633,8 @@ namespace SDRAC
                           
                             if (MainMenuForm.dataClass.ManualOrAuto)
                             {
-                                simpleLan.SendNewCommand(SetAnglesManualCom());
-                                simpleLan.SendNewCommand(SetSpeedManual());
+                                simpleLan.SendNewCommand(0,SetAnglesManualCom());
+                                simpleLan.SendNewCommand(0, SetSpeedManual());
                                 MainMenuForm.dataClass.UploadMath = false;
                             }
                             else
@@ -3654,8 +3662,8 @@ namespace SDRAC
                                 if (CheckIfachived(MainMenuForm.dataClass.JoIN, cord.AngleLast, compare) && counted && !forceCount || startCount)
                                 {
                                     startCount = false;
-                                    simpleLan.SendNewCommand(cord.cm2);
-                                    simpleLan.SendNewCommand(cord.cm1);                           
+                                    simpleLan.SendNewCommand(0, cord.cm2);
+                                    simpleLan.SendNewCommand(0, cord.cm1);                           
                                     counted = false;
                                 }
                                 else if (!counted || forceCount)
@@ -3677,7 +3685,7 @@ namespace SDRAC
                             {
                                 if (CheckIfachived(MainMenuForm.dataClass.JoIN, cord.AngleLast, compare) && counted)
                                 {
-                                    simpleLan.SendNewCommand(cord.CodeData,false,2,cord.DataToSend);
+                                    simpleLan.SendNewCommand(0, cord.CodeData,false,2,cord.DataToSend);
                                     counted = false;
                                 }
                                 else if (!counted)
@@ -3716,7 +3724,7 @@ namespace SDRAC
                                 dataLimits[h] = Convert.ToInt32(limitDa);
                             }
 
-                            simpleLan.SendNewCommand(40,false,2,dataLimits);
+                            simpleLan.SendNewCommand(0, 40,false,2,dataLimits);
                          
                         }
 
@@ -3726,21 +3734,16 @@ namespace SDRAC
                             int[] datS = new int[1];
                             if (MainMenuForm.dataClass.Stop) datS[0]=61;
                             else datS[0] = 69;                      
-                            simpleLan.SendNewCommand(32,false,1,datS);
+                            simpleLan.SendNewCommand(0, 32,false,1,datS);
                         }
 
                         if (MainMenuForm.dataClass.TurnOffRobot)
                         {
                             MainMenuForm.dataClass.TurnOffRobot = false;                        
-                            simpleLan.SendNewCommand(60,false);
+                            simpleLan.SendNewCommand(0, 60,false);
                         }
 
-                        #endregion
-
-
-                        int numC = simpleLan.cListErrors.Count();
-                        int numP = simpleLan.cListOut.Count();
-                        int numH = simpleLan.cListIn.Count();
+                        #endregion       
                     }
 
                     if (reader != null) reader.Close();

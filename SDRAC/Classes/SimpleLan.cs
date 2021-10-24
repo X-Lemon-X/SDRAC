@@ -35,22 +35,19 @@ namespace SDRAC.Classes
         #endregion
 
         #region Objects
-        public Thread readLW, sendLW = null, threadListen=null;
-        public Thread[] threadConnections = null;
-        public TcpClient tcpClient = null;
-        public static Socket socketCon = null;
-        public NetworkStream stream = null;
-        public List<Command> cListOut = null;
-        public List<Command> cListIn = null;
-        public List<ErrorClass> cListErrors = null;
-        public List<int> idListIn = null, idListOut = null;
+        public Socket socketM=null; 
+        public Thread threadListen=null;
         public List<ConnectionData> cdl = null;
+        public List<ErrorClass> cListErrorsDef = new List<ErrorClass>();
+        public int[] ConnectionIdL = null;
+        public Codes codes = new Codes();
 
         public event EventHandler<Command> NewDataIncomeEvent;
         public event EventHandler<ErrorClass> ErrorIncomingEvent;
         public event EventHandler<bool> ConnectionStatusChangedEvent;
+        public event EventHandler<EventClassReturn> EventClassReturnHandler;
 
-        private static Mutex mutexAdd = new Mutex(), mutexRead = new Mutex();
+        // private static Mutex mutexAdd = new Mutex(), mutexRead = new Mutex();
         #endregion
 
         #region Setup veriables
@@ -68,20 +65,26 @@ namespace SDRAC.Classes
         public bool connected = false;
         public string hostIp;
         public bool SerwerOrClient = false; // true for server      false for client
+        public int maxHosts;
         #endregion
 
-        #region Veriables
-        int commandCounter = 0;     
-        //private delEventHandler _show;
-        public int code = 0;
-        bool ack, notAck, connectedLastState=false;
-        int msgIdAck;
-        long communicatsRecived = 0, notAcknowledgeRecived = 0, acknowledgeRecived = 0, passedCommunicats = 0, sthRecived=0;
-        private string _hostIp;
 
-        #endregion
 
         #region Classes
+
+        public class Codes
+        { 
+            private int _ackNowledge = 35000;
+            private int _notAckNowledge = 36000;
+            private int _portChange = 37000;
+            private int _alive = 38000;
+
+            public int AckNowledge { get => _ackNowledge; }
+            public int NotAckNowledge { get => _notAckNowledge; }
+            public int PortChange { get => _portChange; }
+            public int Alive { get => _alive;}
+        }
+
         public class Command
         {
             public byte[] dataf = null, dataOnly = null;
@@ -209,7 +212,7 @@ namespace SDRAC.Classes
 
         public class ErrorClass
         {
-            public int id = 0;
+            public int id = 0,idConnection;
             public string shortMsg = null, longMsg = null, time=null;
             public Command command = null;
             public DateTime datatime;
@@ -249,15 +252,35 @@ namespace SDRAC.Classes
             public string _ip=null;
             public int _portPrivate =0, id=-1,code = 0, msgIdAck=0;
             public bool connected = false, working=false,ack, notAck, connectedLastState=false;
-            public TcpClient tcpClient = null;
-            public static Socket sc = null;
-            public NetworkStream stream = null;
+            public Socket socketCon = null;
             public List<Command> cListOut = null;
             public List<Command> cListIn = null;
             public List<ErrorClass> cListErrors = null;
             public List<int> idListIn = null, idListOut = null;
-            public static Mutex mutexAdd = new Mutex(), mutexRead = new Mutex();
-            long communicatsRecived = 0, notAcknowledgeRecived = 0, acknowledgeRecived = 0, passedCommunicats = 0, sthRecived=0;
+            public Mutex mutexAdd = null, mutexRead = null;
+            public Thread readLW= null, sendLW = null;
+            public long communicatsRecived = 0, notAcknowledgeRecived = 0, acknowledgeRecived = 0, passedCommunicats = 0, sthRecived=0;
+
+            public void DefaultStart()
+            {
+               cListOut = new List<Command>();
+               cListIn = new List<Command>();
+               cListErrors = new List<ErrorClass>();
+               idListIn = new List<int>(); 
+               idListOut = new List<int>();
+                mutexAdd = new Mutex();
+                mutexRead = new Mutex();
+                id = 0;
+            }
+        }
+
+        public class EventClassReturn
+        {
+            public int _idConn = -1;
+            public ErrorClass _errorClass = null;
+            public Command _command = null;
+            public bool _connection = false;
+            public bool _connected = false;
             
         }
 
@@ -269,45 +292,46 @@ namespace SDRAC.Classes
 
         public class SetupSerwer
         {
-            public int _msgMaxSize = 64, _defoultPort = 25000, _oneMessageTimeout = 100, _disconnectedTimeout = 1000, _maxHosts = 8;
+            public int _msgMaxSize = 64, _defoultPort = 25000, _oneMessageTimeout = 100, _disconnectedTimeout = 1000, _maxHosts = 16;
 
         }
+
         #endregion
 
         #region SendNewCommand
-        public int SendNewCommand(int _code, bool _rm, int _Length, long[] _data)
+        public int SendNewCommand(int idConnection,int _code, bool _rm, int _Length, long[] _data)
         {
             Command cm = new Command();
             cm.CreateNew(_code, _rm, _Length, _data);
-            return AddQueue(cm);
+            return AddQueue(cm, idConnection);
         }
-        public int SendNewCommand(int _code, bool _rm, int _Length, int[] _data)
+        public int SendNewCommand(int idConnection, int _code, bool _rm, int _Length, int[] _data)
         {
             Command cm = new Command();
             cm.CreateNew(_code, _rm, _Length, _data);
-            return AddQueue(cm);
+            return AddQueue(cm, idConnection);
         }
-        public int SendNewCommand(int _code, bool _rm, byte[] _data)
+        public int SendNewCommand(int idConnection, int _code, bool _rm, byte[] _data)
         {
             Command cm = new Command();
             cm.CreateNew(_code, _rm, _data);
-            return AddQueue(cm);
+            return AddQueue(cm, idConnection);
         }
-        public int SendNewCommand(int _code, bool _rm)
+        public int SendNewCommand(int idConnection, int _code, bool _rm)
         {
             Command cm = new Command();
             cm.CreateNew(_code, _rm);
-            return AddQueue(cm);
+            return AddQueue(cm, idConnection);
         }
-        public int SendNewCommand(int _code, bool _rm, string _data)
+        public int SendNewCommand(int idConnection, int _code, bool _rm, string _data)
         {
             Command cm = new Command();
             cm.CreateNew(_code, _rm, _data);
-            return AddQueue(cm);
+            return AddQueue(cm, idConnection);
         }
-        public int SendNewCommand(Command command)
+        public int SendNewCommand(int idConnection, Command command)
         {
-            return AddQueue(command);
+            return AddQueue(command, idConnection);
         }
 
         #endregion
@@ -340,7 +364,6 @@ namespace SDRAC.Classes
             defaultPort = sc._defaultPort;
             hostIp = sc._hostIp4;
             localIp = LocalIp4();
-
             oneMessageTimeout = sc._oneMessageTimeout;
             messagesTimeout = sc._oneMessageTimeout * 10 + 100;
             connectionNoAnswearDelay = messagesTimeout * 2;
@@ -357,7 +380,7 @@ namespace SDRAC.Classes
             bufferSize = 2 * ss._msgMaxSize;
             defaultPort = ss._defoultPort;
             localIp = LocalIp4();
-
+            maxHosts = ss._maxHosts;
             oneMessageTimeout = ss._oneMessageTimeout;
             messagesTimeout = ss._oneMessageTimeout * 10 + 100;
             connectionNoAnswearDelay = messagesTimeout * 2;
@@ -371,13 +394,21 @@ namespace SDRAC.Classes
 
         public int Start()
         {
-            try
+            if (NetworkInterface.GetIsNetworkAvailable())
             {
-                Stop();
-                if (SerwerOrClient) return SetSerwer();
-                else return SetClient();  
+                if (localIp != null)
+                {
+                    try
+                    {
+                        Stop();
+                        if (SerwerOrClient) return SetSerwer();
+                        else return SetClient();
+                    }
+                    catch (Exception ex) { AddError(0, new ErrorClass() { id = 6, shortMsg = "Start() Error/Begining", longMsg = ex.ToString() }); }
+                }
+                else AddError(0, new ErrorClass() { id = 7, shortMsg = "LoclaIp=null" });
             }
-            catch (Exception ex) { AddError(new ErrorClass() { id = 6, shortMsg = "Start() Error/Begining", longMsg = ex.ToString() }); }
+            else AddError(0, new ErrorClass() { id = 11, shortMsg = "No network connection!" });
 
             return -2;
         }
@@ -390,89 +421,48 @@ namespace SDRAC.Classes
 
         private int SetSerwer()
         {
-            if (NetworkInterface.GetIsNetworkAvailable())
+            try
             {
-                if (localIp != null)
-                {
-                    try
-                    {
-                        readingLanWifi = false;
-                        
-                        int connectedDev = 0;
-                        foreach (var item in threadConnections)
-                        {
-                            if (item != null)
-                            if (item.IsAlive)
-                            { 
-                               if( cdl!=null) if(connectedDev < cdl.Count)
-                                  { cdl[connectedDev].working = false; item.Join();}
-                               else item.Abort();                            
-                            }
-                        }
-                        if (threadListen != null) if (readLW.IsAlive) readLW.Abort();
-
-
-                        if (socketCon != null) if (socketCon.Connected) socketCon.Close();
-                        socketCon = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
-                        socketCon.ReceiveBufferSize = receiveBufferSize;
-                        socketCon.ReceiveTimeout = reciveTimeout;
-                        socketCon.SendTimeout = sendTimeout; 
-
-                        cdl.Clear();
-                        cdl = new List<ConnectionData>();
-
-                        readingLanWifi = true;
-                        readLW = new Thread(new ThreadStart(ListenSerwerHandler));
-                        readLW.Start();
-
-                        return 1;
-                    }
-                    catch (Exception ex) { AddError(new ErrorClass() { id = 5, shortMsg = "Start() Error/Setings", longMsg = ex.ToString() }); }
-                }
-                else AddError(new ErrorClass() { id = 7, shortMsg = "LoclaIp=null" });
+                socketM = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
+                socketM.ReceiveBufferSize = receiveBufferSize;
+                socketM.ReceiveTimeout = reciveTimeout;
+                socketM.SendTimeout = sendTimeout;
+                cdl = new List<ConnectionData>();
+                threadListen = new Thread(new ThreadStart(ListenSerwerHandler));
+                threadListen.Start();
+                return 1;
             }
-            else AddError(new ErrorClass() { id = 11, shortMsg = "No network connection!" });
+            catch (Exception ex) { AddError(0,new ErrorClass() { id = 5, shortMsg = "Start() Error/Setings", longMsg = ex.ToString() }); }                  
             return -1;
         }
 
         private int SetClient()
         {
-            if (NetworkInterface.GetIsNetworkAvailable())
+            try
             {
-                if (localIp != null)
-                {
-                    try
-                    {       
-                        if(cdl!=null) Stop();
+                cdl = new List<ConnectionData>();
+                cdl.Add(new ConnectionData());
+                ConnectionData cd = cdl[0];
+                           
+                cd.socketCon = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
+                cd.socketCon.ReceiveBufferSize = receiveBufferSize;
+                cd.socketCon.ReceiveTimeout = reciveTimeout;
+                cd.socketCon.SendTimeout = sendTimeout;
+                cd.socketCon.Connect(hostIp, defaultPort);
+                cd._ip = hostIp;
+                cd._portPrivate = defaultPort;
+                cd.id = 0;
+                cd.DefaultStart();
+                cd.working = true;             
+                cd.readLW = new Thread(() => ReadHandler(0));
+                cd.sendLW = new Thread(() => SendHendler(0));
+                cd.readLW.Start();
+                cd.sendLW.Start();
 
-                        cdl.Clear();
-                        cdl.Add(new ConnectionData());
-                        ConnectionData cd = cdl[0];
-                        cd.cListOut = new List<Command>();
-                        cd.cListIn = new List<Command>();
-                        cd.cListErrors = new List<ErrorClass>();
-
-                        if (cd.socketCon != null) if (cd.socketCon.Connected) cd.socketCon.Close();
-
-                        cd.socketCon = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
-                        cd.socketCon.ReceiveBufferSize = receiveBufferSize;
-                        cd.socketCon.ReceiveTimeout = reciveTimeout;
-                        cd.socketCon.SendTimeout = sendTimeout;
-                        cd.socketCon.Connect(cd._ip, cd._portPrivate);           
-
-                        cd.working = true;
-                        cd.readLW = new Thread(new ThreadStart(ReadHandler(0)));
-                        cd.sendLW = new Thread(new ThreadStart(SendHendler(0)));
-                        cd.readLW.Start();
-                        cd.sendLW.Start();
-
-                        return 1;
-                    }
-                    catch (Exception ex) { AddError(0,new ErrorClass() { id = 5, shortMsg = "Start() Error/Setings", longMsg = ex.ToString() }); }
-                }
-                else AddError(0,new ErrorClass() { id = 7, shortMsg = "LoclaIp=null" });
+                return 1;
             }
-            else AddError(0,new ErrorClass() { id = 11, shortMsg = "No network connection!" });
+            catch (Exception ex) { AddError(0,new ErrorClass() { id = 5, shortMsg = "Start() Error/Setings", longMsg = ex.ToString() }); }
+               
 
             return -1;
         }
@@ -485,11 +475,14 @@ namespace SDRAC.Classes
         private int StopClient()
         { 
             try 
-            {	   
-                readingLanWifi = false;
-		        if (readLW != null) if (readLW.IsAlive) readLW.Join();
-                if (sendLW != null) if (sendLW.IsAlive) sendLW.Join();
-                if(socketCon!=null)socketCon.Close();
+            {	  
+                if(cdl!=null)
+                if(cdl.Count>0)
+                {
+                    cdl[0].working = false;
+                    if (cdl[0].readLW != null) if (cdl[0].readLW.IsAlive) cdl[0].readLW.Join();
+                    if (cdl[0].sendLW != null) if (cdl[0].sendLW.IsAlive) cdl[0].sendLW.Join();
+                }
                 return 1;
             }
             catch (Exception)
@@ -518,11 +511,11 @@ namespace SDRAC.Classes
                     }
                 }
                 else
-                    AddError(new ErrorClass() { id = 11, shortMsg = "No network connection!" });
+                    AddError(0,new ErrorClass() { id = 11, shortMsg = "No network connection!" });
                 
             }
             catch (Exception e)
-            { AddError(new ErrorClass() { id = 10, shortMsg="Couldn't set local Ip!", longMsg=e.ToString()}); }
+            { AddError(0,new ErrorClass() { id = 10, shortMsg="Couldn't set local Ip!", longMsg=e.ToString()}); }
             return lP;
         }
 
@@ -624,28 +617,26 @@ namespace SDRAC.Classes
 
         private void ListenSerwerHandler()
         {
+            Codes cod = new Codes();
             Command cm, _notA = new Command(), _ack = new Command(), _portC = new Command();
-            _notA.CreateNew(29, true);
-            _ack.CreateNew(25, true);
+            _notA.CreateNew(cod.NotAckNowledge, true);
+            _ack.CreateNew(cod.AckNowledge, true);
             IPAddress hp = (Dns.Resolve(IPAddress.Any.ToString())).AddressList[0];
             IPEndPoint ep = new IPEndPoint(hp, defaultPort);
-            socketCon.Bind(ep);
+            socketM.Bind(ep);
             bool read = true;
             while (readingLanWifi)
             {
                 try
                 {
                     byte[] buffer = new byte[receiveBufferSize];
-                    try { int g = socketCon.Receive(buffer); read = true; } catch (Exception) { read = false; }
+                    try { int g = socketM.Receive(buffer); read = true; } catch (Exception) { read = false; }
                     int p = 0;
                     if (read)
                     foreach (byte item in buffer)
                     {
                         if (item == (byte)'@')
                         {
-                            //data (a) - 8 * a bit   [] - a few bits  -->  @ (number of bytes)  G (code)    [data]       #  <--
-                            //bytes                   bits = b                             0    1   <b + 3 ;b-2>   b-1    
-                            // Data Look (number)bl => (number of bytes)
                             // @  R|M (3nb size) (2nb msgNumber) G (2 nb code) [data] #
 
                             int size = BytesToInt(ByteArrayCutter(buffer, p + 2, 3));
@@ -654,64 +645,46 @@ namespace SDRAC.Classes
                                 byte[] data = ByteArrayCutter(buffer, p, size + 5);
                                 cm = new Command();
 
-                                communicatsRecived++;
-
-                                mutexRead.WaitOne();
                                 if (cm.DecomposeCommand(data) >= 0)
                                 {
-                                    connected = true;
-                                    passedCommunicats++;
-
-                                    if (cm.code == 25 && cm.id == msgIdAck)
-                                    {
-                                        ack = true; acknowledgeRecived++;
-                                    }
-                                    else if (cm.code == 29 && cm.id == 0)
-                                    {
-                                        notAck = true; notAcknowledgeRecived++;
-                                    }
-                                    else if(cm.code == 10)
+                                    if (cm.code == cod.PortChange)
                                     {
                                         int portCheck = 25001;
-                                        if (cdl.Count != 0)
+                                        if (cdl.Count != 0 || cdl.Count < maxHosts)
                                         while (true)
                                         {
-                                            var list = cdl.Find( e => e._portPrivate == portCheck);
+                                            var list = cdl.Find(e => e._portPrivate == portCheck);
                                             if (list != null) break;
                                             portCheck++;
                                             if (portCheck > 65535) portCheck = 25001;
+                                                    
                                         }
-                                        Send(socketCon,_portC,0);
-                                    }
-                                    else
-                                    {
-                                        Send(socketCon, _ack, cm.id);
-                                        cListIn.Add(cm);
-                                        NewDataIncomeEvent?.Invoke(this, cm);    // ?  robi sprawdzenie czy ivent nie jest null
-                                                                                    //CommandTrigger.Invoke();
+                                        int[] pch = { portCheck };
+                                        _portC.CreateNew(cod.PortChange, true, 2, pch);
+                                        Send(socketM, _portC, 0);
                                     }
                                 }
-                                else { Send(socketCon, _notA, 0); }
+                                else { Send(socketM, _notA, 0); }
                             }
                         }
                         p++;
                     }
                 }
                 catch (Exception ex)
-                {AddError(new ErrorClass() { id = 3, shortMsg = "ListenHandler() Error", longMsg = ex.ToString() });}
+                {AddError(0,new ErrorClass() { id = 3, shortMsg = "ListenHandler() Error", longMsg = ex.ToString() });}
             }
 
-            socketCon.Close();
+            socketM.Close();
         }
 
         private void ReadHandler(int idConnection)
         {
-            ConnectionData cd = cdl[idConnection];
-            Stopwatch sw = new Stopwatch();
-            sw.Start();
+            Codes cod = new Codes();
+            ConnectionData cd = cdl.Find(e => e.id == idConnection);
+            Stopwatch sw = new Stopwatch(); sw.Start();
             Command cm, _notA = new Command(), _ack = new Command();
-            _notA.CreateNew(29,true);
-            _ack.CreateNew(25,true);
+            _notA.CreateNew(cod.NotAckNowledge,true);
+            _ack.CreateNew(cod.AckNowledge,true);
             int[] empty ={0};
 
             while (cd.working)
@@ -720,7 +693,7 @@ namespace SDRAC.Classes
                 {
                     byte[] readB = new byte[bufferSize];
                     bool read = true;
-                    try { int g = cd.socketCon.Receive(readB); sthRecived++; } catch (Exception ex) { read = false; }
+                    try { int g = cd.socketCon.Receive(readB); cd.sthRecived++; } catch (Exception ex) { read = false; }
 
                     int p = 0;
                     if(read)
@@ -728,9 +701,6 @@ namespace SDRAC.Classes
                     {
                         if (item == (byte)'@')
                         {
-                            //data (a) - 8 * a bit   [] - a few bits  -->  @ (number of bytes)  G (code)    [data]       #  <--
-                            //bytes                   bits = b                             0    1   <b + 3 ;b-2>   b-1    
-                            // Data Look (number)bl => (number of bytes)
                             // @  R|M (3nb size) (2nb msgNumber) G (2 nb code) [data] #
                             
                             int size = BytesToInt(ByteArrayCutter(readB, p + 2, 3));
@@ -747,24 +717,24 @@ namespace SDRAC.Classes
                                     cd.connected = true;
                                     cd.passedCommunicats++;
 
-                                    if (cm.code == 25 && cm.id == msgIdAck)
+                                    if (cm.code == cod.AckNowledge && cm.id == cd.msgIdAck)
                                     {
                                         cd.ack = true; cd.acknowledgeRecived++;
                                     }
-                                    else if (cm.code == 29 && cm.id==0)
+                                    else if (cm.code == cod.NotAckNowledge && cm.id==0)
                                     {
                                         cd.notAck = true; cd.notAcknowledgeRecived++;
                                     }
-                                    else if(cm.code == 25 && cm.id != msgIdAck)
+                                    else if(cm.code == cod.AckNowledge && cm.id != cd.msgIdAck)
                                     {
-                                        AddError(idConnection,new ErrorClass() { id = 9, command = cm, shortMsg = "Id not confirmed!", longMsg = "in=>" + cm.id.ToString() + "   out=>" + msgIdAck.ToString() });
+                                        AddError(idConnection,new ErrorClass() { id = 9, command = cm, shortMsg = "Id not confirmed!", longMsg = "in=>" + cm.id.ToString() + "   out=>" + cd.msgIdAck.ToString() });
                                     }        
                                     else
                                     {
                                         Send(cd.socketCon,_ack, cm.id);
                                         cd.cListIn.Add(cm);
-                                        NewDataIncomeEvent?.Invoke(this,idConnection,cm);    // ?  robi sprawdzenie czy ivent nie jest null
-                                        //CommandTrigger.Invoke();
+                                        EventClassReturnHandler?.Invoke(this,new EventClassReturn() { _command =cm});
+                                        //NewDataIncomeEvent?.Invoke(this,cm);    // ?  robi sprawdzenie czy ivent nie jest null                                      
                                     }
                                 }
                                 else { Send(cd.socketCon,_notA, 0); }
@@ -781,7 +751,12 @@ namespace SDRAC.Classes
                 if (sw.ElapsedMilliseconds > connectionNoAnswearDelay)
                     cd.connected = false;
 
-                if (cd.connectedLastState != cd.connected) { cd.connectedLastState = cd.connected; ConnectionStatusChangedEvent?.Invoke(this,idConnection,cd.connected); }
+                if (cd.connectedLastState != cd.connected)
+                { 
+                    cd.connectedLastState = cd.connected; 
+                    EventClassReturnHandler?.Invoke(this, new EventClassReturn() { _connection = true, _connected=cd.connected }); 
+                   // ConnectionStatusChangedEvent?.Invoke(this,cd.connected); 
+                }
 
             }
             cd.connected = false;
@@ -790,10 +765,11 @@ namespace SDRAC.Classes
 
         private void SendHendler(int idConnection)
         {
-            ConnectionData cd = cdl[id];
+            Codes cod = new Codes();
+            ConnectionData cd = cdl.Find(e => e.id == idConnection);
             Stopwatch timer = Stopwatch.StartNew(), tAlive = Stopwatch.StartNew();
             Command aliveC = new Command(), currentCm = null;
-            aliveC.CreateNew(8, false);
+            aliveC.CreateNew(cod.Alive, false);
 
             int counter = 0;
             bool wait = false, elap = false;
@@ -860,7 +836,7 @@ namespace SDRAC.Classes
                                 timer.Stop();
                                 tAlive.Restart();
                                 counter = 0;
-                                AddError(new ErrorClass() { id = 1, command = currentCm, shortMsg = "Skipped message/Timed out" });
+                                AddError(idConnection,new ErrorClass() { id = 1, command = currentCm, shortMsg = "Skipped message/Timed out" });
                                 currentCm = null;
                             }
                             else if ((elapsed = timer.ElapsedMilliseconds) >= oneMessageTimeout) elap = true;
@@ -886,17 +862,16 @@ namespace SDRAC.Classes
             catch (Exception ex) { AddError(new ErrorClass() { id = 4, shortMsg = "Send() Error", longMsg = ex.ToString() }); }
         }
 
-        private int AddQueue(Command dataAdd)
+        private int AddQueue(Command dataAdd,int idConnection)
         {
-            if(dataAdd != null)
-             if (dataAdd.id >= 0)
-             {
-                mutexAdd.WaitOne();
-                cListOut.Add(dataAdd);
-                mutexAdd.ReleaseMutex();
-                return 0;
-             }
-
+            if(dataAdd != null && dataAdd.id >= 0 && idConnection >= 0)
+            {
+                ConnectionData cd = cdl.Find(e => e.id == idConnection);
+                cd.mutexAdd.WaitOne();
+                cd.cListOut.Add(dataAdd);
+                cd.mutexAdd.ReleaseMutex();
+                return 1;
+            }
             return -1;
         }
 
@@ -904,9 +879,21 @@ namespace SDRAC.Classes
         {
             if (er != null)
             {
+                ConnectionData cd= cdl.Find(e => e.id == idConnection);
                 er.SetCurrentTime();
-                cdl[idConnection].cListErrors.Add(er);
-                ErrorIncomingEvent?.Invoke(this,idConnection, er);
+                cd.cListErrors.Add(er);
+                EventClassReturnHandler?.Invoke(this,new EventClassReturn() { _errorClass = er , _idConn = idConnection});
+                //ErrorIncomingEvent?.Invoke(this, er);
+            }
+        }
+
+        private void AddError(ErrorClass er)
+        {
+            if (er != null)
+            {
+                er.SetCurrentTime();
+                cListErrorsDef.Add(er);
+                EventClassReturnHandler?.Invoke(this, new EventClassReturn() { _errorClass = er });
             }
         }
         #endregion

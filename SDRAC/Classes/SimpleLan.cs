@@ -18,7 +18,7 @@ namespace SDRAC.Classes
     {
         #region Error ID Description
 
-        /* summary errors id
+        /* summary errors id 
          * 
          * id = 1, shortMsg = "Skipped message"
          * id = 2, shortMsg = "SendHandler() Error"
@@ -30,6 +30,7 @@ namespace SDRAC.Classes
          * id = 10, shortMsg = "Couldn't set local Ip!"
          * id = 11, shortMsg = "No network connection!"
          * 
+         * Don't touch
          */
 
         #endregion
@@ -894,6 +895,5 @@ namespace SDRAC.Classes
             }
         }
         #endregion
-
     }
 }

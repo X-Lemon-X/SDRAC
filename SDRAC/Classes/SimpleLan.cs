@@ -16,7 +16,7 @@ namespace SDRAC.Classes
 {
     public class SimpleLan
     {
-        #region Description
+        #region Error ID Description
 
         /* summary errors id
          * 
@@ -67,8 +67,6 @@ namespace SDRAC.Classes
         public bool SerwerOrClient = false; // true for server      false for client
         public int maxHosts;
         #endregion
-
-
 
         #region Classes
 
@@ -268,9 +266,9 @@ namespace SDRAC.Classes
                cListErrors = new List<ErrorClass>();
                idListIn = new List<int>(); 
                idListOut = new List<int>();
-                mutexAdd = new Mutex();
-                mutexRead = new Mutex();
-                id = 0;
+               mutexAdd = new Mutex();
+               mutexRead = new Mutex();
+               id = 0;
             }
         }
 
@@ -279,9 +277,8 @@ namespace SDRAC.Classes
             public int _idConn = -1;
             public ErrorClass _errorClass = null;
             public Command _command = null;
-            public bool _connection = false;
-            public bool _connected = false;
-            
+            public ConnectionData _connectionData = null;
+            public bool _connection = false, _connected = false;
         }
 
         public class SetupClient

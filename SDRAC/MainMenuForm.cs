@@ -3529,6 +3529,7 @@ namespace SDRAC
 
         private int StartSimpleLan()
         {
+            string adip = IPAddress.Any.ToString();
             errorListNumerous = new List<Classes.SimpleLan.ErrorClass>();
             simpleLan = new Classes.SimpleLan();
             simpleLan.EasySetup(128,150,25000,MainMenuForm.dataClass.Ip);

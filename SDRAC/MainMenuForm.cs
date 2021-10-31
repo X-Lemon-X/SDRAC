@@ -799,7 +799,6 @@ namespace SDRAC
                 double x1, x2, x3, y1, y2, y3, v1, v2, v3, w1, w2, w3;
                 double a1 = MainMenuForm.dataClass.A1, a3 = MainMenuForm.dataClass.A3;
 
-
                 A = 2 * a;
                 B = -(a * c * f) - (a * d * e) + (b * e / f);
                 C = b - (a * a / b);
@@ -836,7 +835,6 @@ namespace SDRAC
                 cord.Velocity[6] = MainMenuForm.dataClass.Acceleration;
                 cord.Velocity[7] = MainMenuForm.dataClass.Deacceleration;
                 #endregion
-
             }
             catch (Exception) { byt = false; }
 
@@ -1794,7 +1792,6 @@ namespace SDRAC
             {
                 if (MainMenuForm.dataClass.UploadAble)
                 {
-
                     dataClass.Threads = true;
 
                     readSP = new Thread(ReadSerialPortOptimalised);
@@ -1808,17 +1805,12 @@ namespace SDRAC
 
                     queueSend = new Thread(SendSerialport);
                     if (!queueSend.IsAlive) queueSend.Start();
-
-
                 }
             }
             catch (Exception)
             {
                 MessageBox.Show("Error, Starting threads");
-
             }
-
-
         }
         public void StopThread()
         {
@@ -1951,7 +1943,6 @@ namespace SDRAC
                         {
                             switch (byt[1])
                             {
-
                                 case 21:   // Stop COM
                                     if (!iga)
                                     {
@@ -1983,7 +1974,6 @@ namespace SDRAC
                                     break;
                                 case 30:
                                     break;
-
                             }
                             MainMenuForm.dataClass.QueueIn[g] = null;
                         }
@@ -1991,9 +1981,6 @@ namespace SDRAC
                         {
                             //MessageBox.Show("Error, Thread Prepare, (read:@G)");
                         }
-
-
-
                     }
                     g++; if (g >= 64) g = 0;
                 }
@@ -2006,15 +1993,10 @@ namespace SDRAC
         #region Optimalized to 25% of the processor READ Srial port AND QueIN FUNCTION
         private void QueueInOptimalised(byte[] data)
         {
-
             try
             {
-
                 if (data != null)
                 {
-
-
-
                     if (data[0] == (byte)'G')
                     {
                         switch (data[1])
@@ -2049,24 +2031,18 @@ namespace SDRAC
                                 break;
                             case 30:
                                 break;
-
                         }
-
                     }
                     else
                     {
                         //MessageBox.Show("Error, Thread Prepare, (read:@G)");
                     }
-
                 }
-
             }
             catch (Exception ex) { MessageBox.Show(ex.ToString(), "Error, Thread Prepare"); }
-
         }
         private void ReadSerialPortOptimalised()
         {
-
             char beg;
             byte[] lon = new byte[1];
             int length;
@@ -2075,12 +2051,10 @@ namespace SDRAC
             int c = 0;
             int cou = 0;
 
-
             while (MainMenuForm.dataClass.Threads)
             {
                 try
                 {
-
                     if (MainMenuForm.serialPort.BytesToRead > 16)
                     {
                         beg = Convert.ToChar(serialPort.ReadChar());
@@ -2094,16 +2068,12 @@ namespace SDRAC
                             if (byts != null)
                             {
                                 MainMenuForm.dataClass.StopD++;
-
                                 QueueInOptimalised(byts);
-
                             }
                             else
                             {
                                 MainMenuForm.dataClass.MissedCur++;
                             }
-
-
                         }
                         else
                         {
@@ -2112,11 +2082,9 @@ namespace SDRAC
                             MainMenuForm.dataClass.StopB++;
                         }
                     }
-
                 }
                 catch (Exception ex) { MessageBox.Show(ex.ToString(), "Error, Thread Read: ReadSerialPort "); }
             }
-
         }
 
         #endregion
@@ -2718,7 +2686,6 @@ namespace SDRAC
                             MainMenuForm.movementWayPath.Mode = 1;
                         }
                     }
-
                     // coping data from temp file to original
                     ff.CopyFromOneFileToAnother(pathTemp, pathMane);
 
@@ -2726,9 +2693,6 @@ namespace SDRAC
                     //FileSystem               
                     FileInfo fileInfo = new FileInfo(pathTemp);
                     fileInfo.Delete();
-
-
-
                 }
                 else
                 { MessageBox.Show("File isn't set or doesn't exist.", "Problew with a file", MessageBoxButtons.OK, MessageBoxIcon.Information); }
@@ -2840,12 +2804,7 @@ namespace SDRAC
                                     }
                                 }
                             }
-
                             fileFun.CopyFromOneFileToAnother(pathProgram, MainMenuForm.movementWayPath.Path);
-
-
-
-
                         }
                         else
                         {
@@ -2855,14 +2814,11 @@ namespace SDRAC
                         FileInfo fileInfo = new FileInfo(pathProgram);
                         fileInfo.Delete();
                     }
-
                 }
                 else
                 {
                     MessageBox.Show("File isn't set or doesn't exist.", "Problew with a file", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
-
-
             }
             catch (Exception)
             {
@@ -2870,7 +2826,6 @@ namespace SDRAC
             }
 
         }
-
         //ended  
         private Cordinants EncodeFromFileToSend(string readed, Cordinants cord)
         {
@@ -3535,6 +3490,8 @@ namespace SDRAC
             simpleLan.EasySetup(128,150,25000,MainMenuForm.dataClass.Ip);
             simpleLan.EventClassReturnHandler += SimpleLan_EventClassReturnHandler;
 
+            Classes.SimpleLan.SetupClient sc = new Classes.SimpleLan.SetupClient();
+
             simpleLan.NewDataIncomeEvent += SimpleLan_NewDataIncomeEvent;
             simpleLan.ErrorIncomingEvent += SimpleLan_ErrorIncomingEvent;
             simpleLan.ConnectionStatusChangedEvent += SimpleLan_ConnectionStatusChangedEvent;
@@ -3625,8 +3582,6 @@ namespace SDRAC
                 {
                     while (MainMenuForm.dataClass.Threads)
                     {
-                        //ReadSerialPortAllinOne();
-
                         #region Math
                         if (MainMenuForm.dataClass.UploadMath)
                         {
@@ -3634,8 +3589,8 @@ namespace SDRAC
                           
                             if (MainMenuForm.dataClass.ManualOrAuto)
                             {
-                                simpleLan.SendNewCommand(0,SetAnglesManualCom());
-                                simpleLan.SendNewCommand(0, SetSpeedManual());
+                                simpleLan.SendNewCommand(0,SetAnglesManualCom(),false);
+                                simpleLan.SendNewCommand(0, SetSpeedManual(), false);
                                 MainMenuForm.dataClass.UploadMath = false;
                             }
                             else
@@ -3663,8 +3618,8 @@ namespace SDRAC
                                 if (CheckIfachived(MainMenuForm.dataClass.JoIN, cord.AngleLast, compare) && counted && !forceCount || startCount)
                                 {
                                     startCount = false;
-                                    simpleLan.SendNewCommand(0, cord.cm2);
-                                    simpleLan.SendNewCommand(0, cord.cm1);                           
+                                    simpleLan.SendNewCommand(0, cord.cm2, false);
+                                    simpleLan.SendNewCommand(0, cord.cm1, false);                           
                                     counted = false;
                                 }
                                 else if (!counted || forceCount)
@@ -3686,7 +3641,7 @@ namespace SDRAC
                             {
                                 if (CheckIfachived(MainMenuForm.dataClass.JoIN, cord.AngleLast, compare) && counted)
                                 {
-                                    simpleLan.SendNewCommand(0, cord.CodeData,false,2,cord.DataToSend);
+                                    simpleLan.SendNewCommand(0, cord.CodeData,false,2,cord.DataToSend, false);
                                     counted = false;
                                 }
                                 else if (!counted)
@@ -3709,7 +3664,6 @@ namespace SDRAC
                         #endregion
 
                         #region Seting
-
                         if (MainMenuForm.dataClass.UpdateSetup)
                         {
                             MainMenuForm.dataClass.UpdateSetup = false;
@@ -3725,7 +3679,7 @@ namespace SDRAC
                                 dataLimits[h] = Convert.ToInt32(limitDa);
                             }
 
-                            simpleLan.SendNewCommand(0, 40,false,2,dataLimits);
+                            simpleLan.SendNewCommand(0, 40,false,2,dataLimits, false);
                          
                         }
 
@@ -3734,19 +3688,17 @@ namespace SDRAC
                             MainMenuForm.dataClass.StopSend = true;
                             int[] datS = new int[1];
                             if (MainMenuForm.dataClass.Stop) datS[0]=61;
-                            else datS[0] = 69;                      
-                            simpleLan.SendNewCommand(0, 32,false,1,datS);
+                            else datS[0] = 69;
+                            simpleLan.SendNewCommand(0, 32, false, 1, datS, true);
                         }
 
                         if (MainMenuForm.dataClass.TurnOffRobot)
                         {
                             MainMenuForm.dataClass.TurnOffRobot = false;                        
-                            simpleLan.SendNewCommand(0, 60,false);
+                            simpleLan.SendNewCommand(0, 60,false, false);
                         }
-
                         #endregion       
                     }
-
                     if (reader != null) reader.Close();
                 }
                 catch (Exception) {MainMenuForm.dataClass.ErrorStop = true;}

@@ -11,7 +11,6 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using static System.Net.Mime.MediaTypeNames;
 
-
 namespace SDRAC.Classes
 {
     public class SimpleLan
@@ -88,6 +87,7 @@ namespace SDRAC.Classes
             public byte[] dataf = null, dataOnly = null;
             public int id = -1, size = -1, code = -1, fullSize=0;
             public bool rm = false;
+            public long idComand = -1;
 
             #region CreateNew
             public void CreateNew(int _code, bool _rm, int _Length, long[] _data)
@@ -249,15 +249,19 @@ namespace SDRAC.Classes
         {
             public string _ip=null;
             public int _portPrivate =0, id=-1,code = 0, msgIdAck=0;
+            public long idCommandLast = 0;
             public bool connected = false, working=false,ack, notAck, connectedLastState=false;
             public Socket socketCon = null;
             public List<Command> cListOut = null;
             public List<Command> cListIn = null;
             public List<ErrorClass> cListErrors = null;
             public List<int> idListIn = null, idListOut = null;
-            public Mutex mutexAdd = null, mutexRead = null;
+            public Mutex mutexAdd = null, mutexRead = null, mutexSendPriotity = null;
             public Thread readLW= null, sendLW = null;
             public long communicatsRecived = 0, notAcknowledgeRecived = 0, acknowledgeRecived = 0, passedCommunicats = 0, sthRecived=0;
+            public Command commandPriority = null;
+            public Command cpError = new Command() { id = -5, code = 0};
+            public Command cpSend = new Command() { id = -10, code = 0 };
 
             public void DefaultStart()
             {
@@ -268,6 +272,7 @@ namespace SDRAC.Classes
                idListOut = new List<int>();
                mutexAdd = new Mutex();
                mutexRead = new Mutex();
+               mutexSendPriotity = new Mutex();
                id = 0;
             }
         }
@@ -296,39 +301,39 @@ namespace SDRAC.Classes
         #endregion
 
         #region SendNewCommand
-        public int SendNewCommand(int idConnection,int _code, bool _rm, int _Length, long[] _data)
+        public long SendNewCommand(int idConnection,int _code, bool _rm, int _Length, long[] _data, bool priority)
         {
             Command cm = new Command();
             cm.CreateNew(_code, _rm, _Length, _data);
-            return AddQueue(cm, idConnection);
+            return AddQueue(cm, idConnection, priority);
         }
-        public int SendNewCommand(int idConnection, int _code, bool _rm, int _Length, int[] _data)
+        public long SendNewCommand(int idConnection, int _code, bool _rm, int _Length, int[] _data, bool priority)
         {
             Command cm = new Command();
             cm.CreateNew(_code, _rm, _Length, _data);
-            return AddQueue(cm, idConnection);
+            return AddQueue(cm, idConnection, priority);
         }
-        public int SendNewCommand(int idConnection, int _code, bool _rm, byte[] _data)
+        public long SendNewCommand(int idConnection, int _code, bool _rm, byte[] _data, bool priority)
         {
             Command cm = new Command();
             cm.CreateNew(_code, _rm, _data);
-            return AddQueue(cm, idConnection);
+            return AddQueue(cm, idConnection, priority);
         }
-        public int SendNewCommand(int idConnection, int _code, bool _rm)
+        public long SendNewCommand(int idConnection, int _code, bool _rm, bool priority)
         {
             Command cm = new Command();
             cm.CreateNew(_code, _rm);
-            return AddQueue(cm, idConnection);
+            return AddQueue(cm, idConnection, priority);
         }
-        public int SendNewCommand(int idConnection, int _code, bool _rm, string _data)
+        public long SendNewCommand(int idConnection, int _code, bool _rm, string _data, bool priority)
         {
             Command cm = new Command();
             cm.CreateNew(_code, _rm, _data);
-            return AddQueue(cm, idConnection);
+            return AddQueue(cm, idConnection, priority);
         }
-        public int SendNewCommand(int idConnection, Command command)
+        public long SendNewCommand(int idConnection, Command command, bool priority)
         {
-            return AddQueue(command, idConnection);
+            return AddQueue(command, idConnection, priority);
         }
 
         #endregion
@@ -450,6 +455,7 @@ namespace SDRAC.Classes
         {
             try
             {
+                cdlSerwer = new ConnectionData();
                 cdlSerwer.socketCon = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
                 cdlSerwer.socketCon.ReceiveBufferSize = receiveBufferSize;
                 cdlSerwer.socketCon.ReceiveTimeout = reciveTimeout;
@@ -484,7 +490,7 @@ namespace SDRAC.Classes
                 cd.DefaultStart();
                 cd.working = true;             
                 cd.readLW = new Thread(() => ReadHandler(cd));
-                cd.sendLW = new Thread(() => SendHendler(cd));
+                cd.sendLW = new Thread(() => SendPriority(cd));
                 cd.readLW.Start();
                 cd.sendLW.Start();
 
@@ -522,9 +528,9 @@ namespace SDRAC.Classes
                 }
                 return 1;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                AddError(0,new ErrorClass() {shortMsg="StopSerwer() error" });
+                AddError(0,new ErrorClass() {shortMsg="StopSerwer() error", longMsg = ex.ToString() });
                 return -1;
             }
         }
@@ -917,11 +923,10 @@ namespace SDRAC.Classes
             }
         }
 
-        private int SendPriority(ConnectionData cd)
+        private void SendPriority(ConnectionData cd)
         {
             int idConnection = cd.id;
             Codes cod = new Codes();
-
             Stopwatch timer = Stopwatch.StartNew(), tAlive = Stopwatch.StartNew();
             Command aliveC = new Command(), currentCm = null;
             aliveC.CreateNew(cod.Alive, false);
@@ -938,17 +943,27 @@ namespace SDRAC.Classes
             {
                 try
                 {
-                    
+                    cd.mutexRead.WaitOne();
+
                     if (tAlive.ElapsedMilliseconds >= sendTimeout)
                     { id++; Send(cd.socketCon, aliveC, id); cd.msgIdAck = id; tAlive.Restart(); }
 
                     cd.connected = true;
+                    
                     if (cd.connected)
                     {
                         if (currentCm == null)
                         {
+                            bool prio = true;
                             cd.mutexAdd.WaitOne();
-                            if (cd.cListOut.Count > 0)
+                            if (cd.commandPriority != null)
+                            if (cd.commandPriority.id != cd.cpSend.id && cd.commandPriority.id != cd.cpError.id)
+                            {
+                                cd.mutexSendPriotity.WaitOne();
+                                currentCm = cd.commandPriority;
+                                prio = false;
+                            }
+                            if (cd.cListOut.Count > 0 && prio)
                             {
                                 currentCm = cd.cListOut.First();
                                 cd.cListOut.RemoveAt(0);
@@ -979,6 +994,8 @@ namespace SDRAC.Classes
                             tAlive.Restart();
                             counter = 0;
                             currentCm = null;
+                            cd.commandPriority = cd.cpSend;
+                            cd.mutexSendPriotity.ReleaseMutex();
                         }
                         else
                         {
@@ -992,6 +1009,8 @@ namespace SDRAC.Classes
                                 counter = 0;
                                 AddError(idConnection, new ErrorClass() { id = 1, command = currentCm, shortMsg = "Skipped message/Timed out" });
                                 currentCm = null;
+                                cd.commandPriority = cd.cpError;
+                                cd.mutexSendPriotity.ReleaseMutex();
                             }
                             else if ((elapsed = timer.ElapsedMilliseconds) >= oneMessageTimeout) elap = true;
                         }
@@ -1005,8 +1024,6 @@ namespace SDRAC.Classes
                 }
                 catch (Exception ex) { AddError(idConnection, new ErrorClass() { id = 2, shortMsg = "SendHandler() Error", longMsg = ex.ToString() }); }
             }
-
-            return -1;
         }
 
         private void Send(Socket sc,Command cm, int id)
@@ -1018,15 +1035,33 @@ namespace SDRAC.Classes
             catch (Exception ex) { AddError(new ErrorClass() { id = 4, shortMsg = "Send() Error", longMsg = ex.ToString() }); }
         }
 
-        private int AddQueue(Command dataAdd,int idConnection)
+        private long AddQueue(Command dataAdd,int idConnection, bool priority)
         {
             if(dataAdd != null && dataAdd.id >= 0 && idConnection >= 0)
             {
                 ConnectionData cd = cdl.Find(e => e.id == idConnection);
-                cd.mutexAdd.WaitOne();
-                cd.cListOut.Add(dataAdd);
-                cd.mutexAdd.ReleaseMutex();
-                return 1;
+
+                if (cd.idCommandLast >= 0x7FFFFFFFFFFFFFFF) cd.idCommandLast = -1;
+                cd.idCommandLast++;
+                dataAdd.idComand = cd.idCommandLast;
+
+                if (!priority)
+                {
+                    cd.mutexAdd.WaitOne();
+                    cd.cListOut.Add(dataAdd);
+                    cd.mutexAdd.ReleaseMutex();
+                    return dataAdd.idComand;
+                }
+                else
+                {
+                    cd.mutexAdd.WaitOne();
+                    cd.commandPriority = dataAdd;
+                    cd.mutexAdd.ReleaseMutex();
+                    Thread.Sleep(1);
+                    cd.mutexSendPriotity.WaitOne();
+                    if (cd.commandPriority.id == cd.cpSend.id) return 2;
+                    else return -2;
+                }
             }
             return -1;
         }

@@ -136,7 +136,7 @@ namespace SDRAC
                 double anglesData = cord.AnglesRad[i];
                 if (!double.IsNaN(anglesData))
                 {
-                    anglesData = anglesData / (2 * Math.PI) * MainMenuForm.dataClass.Resolution;
+                    anglesData = anglesData / (2 * Math.PI) * MainMenuForm.dataClass.GearReduction[i];
 
                     int angle = Convert.ToInt32(anglesData);
                     cord.AngleLast[i] = angle;
@@ -830,8 +830,8 @@ namespace SDRAC
                 cord.Velocity[2] = Convert.ToInt32(w3 / 2 / Math.PI * gr[2]);
                 cord.Velocity[3] = Convert.ToInt32(velo / a3 / 2 / Math.PI);
                 cord.Velocity[4] = cord.Velocity[3] * Convert.ToInt32(gr[4]);
-                cord.Velocity[5] = cord.Velocity[3] * Convert.ToInt32(gr[4]);
-                cord.Velocity[3] = cord.Velocity[3] * Convert.ToInt32(gr[4]);
+                cord.Velocity[5] = cord.Velocity[3] * Convert.ToInt32(gr[5]);
+                cord.Velocity[3] = cord.Velocity[3] * Convert.ToInt32(gr[3]);
                 cord.Velocity[6] = MainMenuForm.dataClass.Acceleration;
                 cord.Velocity[7] = MainMenuForm.dataClass.Deacceleration;
                 #endregion

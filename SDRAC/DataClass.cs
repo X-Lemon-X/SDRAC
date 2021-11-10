@@ -25,7 +25,7 @@ namespace SDRAC
         private double[] cor = new double[3];
         private double[] corLast = new double[3];
         private int[] speedManual = {5000, 5000, 5000, 5000, 5000, 5000 };
-        private int[] gearReduction = {48000, 48000, 48000, 40000, 40000, 40000 };
+        private int[] gearReduction = {50000, 50000,50000, 40000, 40000, 40000 };
         private int[] speedAuto = new int[8];
         private int[] speedSend = new int[6];
         private double[] joLimits = { 360,0, 360,0, 360,0, 180, -180, 180, -180, 180, -180 };

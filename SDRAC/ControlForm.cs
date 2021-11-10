@@ -342,16 +342,16 @@ namespace SDRAC
                 iconButtonShutDown.Enabled = false;
             
 
-            //  labelX.Text = (MainMenuForm.dataClass.Cor[0]).ToString();
-            //  labelY.Text = Math.Round(MainMenuForm.dataClass.Cor[1]).ToString();
-            //  labelZ.Text = Math.Round(MainMenuForm.dataClass.Cor[2]).ToString();
+              labelX.Text = (MainMenuForm.dataClass.Cor[0]).ToString();
+              labelY.Text = Math.Round(MainMenuForm.dataClass.Cor[1]).ToString();
+              labelZ.Text = Math.Round(MainMenuForm.dataClass.Cor[2]).ToString();
 
-            // labelJ1.Text = MainMenuForm.dataClass.JoIN[0].ToString();
-            //  labelJ2.Text = MainMenuForm.dataClass.JoIN[1].ToString();
-            //  labelJ3.Text = MainMenuForm.dataClass.JoIN[2].ToString();
-            //  labelJ4.Text = MainMenuForm.dataClass.Jo[3].ToString();
-            //  labelJ5.Text = MainMenuForm.dataClass.Jo[4].ToString();
-            //  labelJ6.Text = MainMenuForm.dataClass.Jo[5].ToString();
+              labelJ1.Text = MainMenuForm.dataClass.JoIN[0].ToString();
+              labelJ2.Text = MainMenuForm.dataClass.JoIN[1].ToString();
+              labelJ3.Text = MainMenuForm.dataClass.JoIN[2].ToString();
+              labelJ4.Text = MainMenuForm.dataClass.JoIN[3].ToString();
+              labelJ5.Text = MainMenuForm.dataClass.JoIN[4].ToString();
+              labelJ6.Text = MainMenuForm.dataClass.JoIN[5].ToString();
 
             labelPath.Text = MainMenuForm.movementWayPath.FileName;
             

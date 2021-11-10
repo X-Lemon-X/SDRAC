@@ -198,9 +198,6 @@ namespace SDRAC
 
                 if (condition) MainMenuForm.dataClass.UploadMath = true;
                 
-
-                
-                
             }
             catch (Exception) { MessageBox.Show("", "Inapropriate number", MessageBoxButtons.OK, MessageBoxIcon.Information); }
 
@@ -550,7 +547,7 @@ namespace SDRAC
             
             MainMenuForm.Tools.LenX = tc.X;
             MainMenuForm.Tools.LenY = tc.Y;
-            MainMenuForm.Tools.LenZ = tc.Z + MainMenuForm.dataClass.A3;
+            MainMenuForm.Tools.LenZ = tc.Z; //+ MainMenuForm.dataClass.A3;
         }
 
         private void iconButtonShutDown_Click(object sender, EventArgs e)

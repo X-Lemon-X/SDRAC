@@ -259,7 +259,7 @@ namespace SDRAC
             double[] yY = new double[2];
             #endregion
 
-            bool repeat = true;
+            bool repeat = false;  //previouslu true
             for (int i = 0; i < 2; i++)
             {
 
@@ -267,7 +267,7 @@ namespace SDRAC
                 if (Y != 0)
                 {
                     alfa1 = Math.Acos(Y / (Math.Sqrt((Y * Y) + (X * X))));
-                    if (alfa1 > 90)
+                    if (alfa1 > Math.PI/2)
                     {
                         alfa1Row = -1 * (alfa1 - Math.PI);
                     }
@@ -290,7 +290,7 @@ namespace SDRAC
                     Y = Y -rY;
                 }
 
-                l = Math.Sqrt((X * X) + (Y * Y));
+                //l = Math.Sqrt((X * X) + (Y * Y));
             }
 
             l = (X * X) + (Y * Y);
@@ -3688,7 +3688,7 @@ namespace SDRAC
                                 dataLimits[h] = Convert.ToInt32(limitDa);
                             }
 
-                            simpleLan.SendNewCommand(0, 40,false,2,dataLimits, false);
+                            simpleLan.SendNewCommand(0, 40,false,2,dataLimits, true);
                          
                         }
 
@@ -3722,52 +3722,47 @@ namespace SDRAC
             if (extendedInfo)
                 add += "[h:m:s:ms]: " + eb.time + "  =>  ";
 
-            if (eb.command.code == 30)
+            add += "Er:" + eb.id;
+            add += "/";
+
+            if (eb.shortMsg != null) add += eb.shortMsg;
+            if (extendedInfo) if (eb.longMsg != null) add += '/' + eb.longMsg;
+
+            if (eb.command != null)
             {
-                int value = eb.command.dataOnly[1], code = eb.command.dataOnly[0];
-
-                if (code >= 0 && code <= 5)
+                if (eb.command.code == 30)
                 {
-                    if (extendedInfo)
-                        add += "  I2C error/";
+                    int value = eb.command.dataOnly[1], code = eb.command.dataOnly[0];
 
-                    add += "code: " + code.ToString() + "/";
-                    if (value == 1) add += "Multiplexer";
-                    else if (value == 2) add += "Seting Pointer";
-                    else if (value == 3) add += "Error reding angle";
-
-                }
-                else if (code == 7) add += "Data/Unsigned comand: " + value.ToString();
-                else if (code == 10)
-                {
-                    if (value == 1) add += "Connected with: " + MainMenuForm.dataClass.Ip;
-                    else if (value == 2) add += "Disconnected from: " + MainMenuForm.dataClass.Ip;
-                }
-            }
-            else
-            {
-                
-                add += "Er:" + eb.id;
-                add += "/";
-                if (eb.shortMsg!= null) add += eb.shortMsg;
-                if (extendedInfo)
-                {
-                    if (eb.longMsg != null) add += '/' + eb.longMsg;
-                    if (eb.command != null)
+                    if (code >= 0 && code <= 5)
                     {
-                        add += "/Msg_ID:" + eb.command.id.ToString();
-                        add += "/Code:" + eb.command.code.ToString();
-                        add += "/size:" + eb.command.size.ToString();
-                        add += "/full_size:" + eb.command.fullSize.ToString();
-                        if (!eb.command.rm) add += "/type:Message";
-                        else add += "/type:Response";
+                        if (extendedInfo)
+                            add += "  I2C error/";
+
+                        add += "code: " + code.ToString() + "/";
+                        if (value == 1) add += "Multiplexer";
+                        else if (value == 2) add += "Seting Pointer";
+                        else if (value == 3) add += "Error reding angle";
 
                     }
+                    else if (code == 7) add += "Data/Unsigned comand: " + value.ToString();
+                    else if (code == 10)
+                    {
+                        if (value == 1) add += "Connected with: " + MainMenuForm.dataClass.Ip;
+                        else if (value == 2) add += "Disconnected from: " + MainMenuForm.dataClass.Ip;
+                    }
+                }
+                else if (extendedInfo)
+                {
+                    add += "/Msg_ID:" + eb.command.id.ToString();
+                    add += "/Code:" + eb.command.code.ToString();
+                    add += "/size:" + eb.command.size.ToString();
+                    add += "/full_size:" + eb.command.fullSize.ToString();
+                    if (!eb.command.rm) add += "/type:Message";
+                    else add += "/type:Response";
                 }
             }
-
             return add;
-        
         }
     }
     public class ErrorBytes

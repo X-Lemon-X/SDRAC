@@ -250,7 +250,7 @@ namespace SDRAC.Classes
             public string _ip=null;
             public int _portPrivate =0, id=-1,code = 0, msgIdAck=0;
             public long idCommandLast = 0;
-            public bool connected = false, working=false,ack, notAck, connectedLastState=false;
+            public bool connected = false, working=false,ack, notAck, connectedLastState=false,priority=false;
             public Socket socketCon = null;
             public List<Command> cListOut = null;
             public List<Command> cListIn = null;
@@ -490,7 +490,7 @@ namespace SDRAC.Classes
                 cd.DefaultStart();
                 cd.working = true;             
                 cd.readLW = new Thread(() => ReadHandler(cd));
-                cd.sendLW = new Thread(() => SendHendler(cd));
+                cd.sendLW = new Thread(() => SendHendlerPriority(cd));
                 cd.readLW.Start();
                 cd.sendLW.Start();
 
@@ -924,14 +924,14 @@ namespace SDRAC.Classes
             }
         }
 
-        private void SendPriority(ConnectionData cd)
+        private void SendHendlerPriority(ConnectionData cd)
         {
             int idConnection = cd.id;
             Codes cod = new Codes();
             Stopwatch timer = Stopwatch.StartNew(), tAlive = Stopwatch.StartNew();
             Command aliveC = new Command(), currentCm = null;
             aliveC.CreateNew(cod.Alive, false);
-
+            cd.commandPriority = cd.cpError;
             int counter = 0;
             bool wait = false, elap = false;
             long elapsed;
@@ -957,13 +957,15 @@ namespace SDRAC.Classes
                         {
                             bool prio = true;
                             cd.mutexAdd.WaitOne();
-                            if (cd.commandPriority != null)
+                            
                             if (cd.commandPriority.id != cd.cpSend.id && cd.commandPriority.id != cd.cpError.id)
                             {
-                                cd.mutexSendPriotity.WaitOne();
+                                //cd.mutexSendPriotity.WaitOne();
                                 currentCm = cd.commandPriority;
+                                cd.priority = true;
                                 prio = false;
                             }
+                            
                             if (cd.cListOut.Count > 0 && prio)
                             {
                                 currentCm = cd.cListOut.First();
@@ -996,7 +998,7 @@ namespace SDRAC.Classes
                             counter = 0;
                             currentCm = null;
                             cd.commandPriority = cd.cpSend;
-                            cd.mutexSendPriotity.ReleaseMutex();
+                            cd.priority = false;
                         }
                         else
                         {
@@ -1007,11 +1009,11 @@ namespace SDRAC.Classes
                                 wait = false;
                                 timer.Stop();
                                 tAlive.Restart();
-                                counter = 0;
+                                counter = 0;                              // id = 2
                                 AddError(idConnection, new ErrorClass() { id = 1, command = currentCm, shortMsg = "Skipped message/Timed out" });
                                 currentCm = null;
                                 cd.commandPriority = cd.cpError;
-                                cd.mutexSendPriotity.ReleaseMutex();
+                                cd.priority = false;
                             }
                             else if ((elapsed = timer.ElapsedMilliseconds) >= oneMessageTimeout) elap = true;
                         }
@@ -1058,8 +1060,10 @@ namespace SDRAC.Classes
                     cd.mutexAdd.WaitOne();
                     cd.commandPriority = dataAdd;
                     cd.mutexAdd.ReleaseMutex();
-                    Thread.Sleep(1);
-                    cd.mutexSendPriotity.WaitOne();
+
+                    while (cd.priority)
+                    { int i = 0; }
+
                     if (cd.commandPriority.id == cd.cpSend.id) return 2;
                     else return -2;
                 }

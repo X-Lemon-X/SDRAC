@@ -258,7 +258,6 @@ namespace SDRAC.Classes
             public List<int> idListIn = null, idListOut = null;
             public Mutex mutexAdd = null, mutexRead = null, mutexSendPriotity = null;
             public Thread readLW= null, sendLW = null;
-            public long communicatsRecived = 0, notAcknowledgeRecived = 0, acknowledgeRecived = 0, passedCommunicats = 0, sthRecived=0;
             public Command commandPriority = null;
             public Command cpError = new Command() { id = -5, code = 0};
             public Command cpSend = new Command() { id = -10, code = 0 };
@@ -491,7 +490,7 @@ namespace SDRAC.Classes
                 cd.DefaultStart();
                 cd.working = true;             
                 cd.readLW = new Thread(() => ReadHandler(cd));
-                cd.sendLW = new Thread(() => SendPriority(cd));
+                cd.sendLW = new Thread(() => SendHendler(cd));
                 cd.readLW.Start();
                 cd.sendLW.Start();
 

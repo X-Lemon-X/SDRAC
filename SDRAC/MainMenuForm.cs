@@ -3531,9 +3531,17 @@ namespace SDRAC
         {
             errorListNumerous = new List<Classes.SimpleLan.ErrorClass>();
             simpleLan = new Classes.SimpleLan();
-            simpleLan.EasySetup(128,150,25000,MainMenuForm.dataClass.Ip);
-            simpleLan.EventClassReturnHandler += SimpleLan_EventClassReturnHandler;
+            //simpleLan.EasySetup(128,150,25000,MainMenuForm.dataClass.Ip);
 
+            Classes.SimpleLan.SetupClient sl = new Classes.SimpleLan.SetupClient();
+            sl._defaultPort = 25000;
+            sl._hostIp4 = MainMenuForm.dataClass.Ip;
+            sl._msgMaxSize = 64;
+            sl._oneMessageTimeout = 50;
+
+            simpleLan.EasySetup(sl);
+
+            simpleLan.EventClassReturnHandler += SimpleLan_EventClassReturnHandler;
             simpleLan.NewDataIncomeEvent += SimpleLan_NewDataIncomeEvent;
             simpleLan.ErrorIncomingEvent += SimpleLan_ErrorIncomingEvent;
             simpleLan.ConnectionStatusChangedEvent += SimpleLan_ConnectionStatusChangedEvent;

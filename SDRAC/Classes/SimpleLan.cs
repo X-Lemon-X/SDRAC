@@ -74,10 +74,10 @@ namespace SDRAC.Classes
 
         public class Codes
         { 
-            private int _ackNowledge = 35000;
-            private int _notAckNowledge = 36000;
-            private int _portChange = 37000;
-            private int _alive = 38000;
+            private int _ackNowledge = 10;
+            private int _notAckNowledge = 11;
+            private int _portChange = 12;
+            private int _alive = 13;
 
             public int AckNowledge { get => _ackNowledge; }
             public int NotAckNowledge { get => _notAckNowledge; }
@@ -184,7 +184,7 @@ namespace SDRAC.Classes
                     id = BytesToInt(ByteArrayCutter(_data, 5, 2));
                     
                     dataf = new byte[size + 5];
-                    if(size > 6) dataOnly = ByteArrayCutter(_data,11,size-6);
+                    if(size > 6) dataOnly = ByteArrayCutter(_data,10,size-6);
                    
                     if (ByteArrayCutter(_data, 1, 1)[0] == (byte)'R') rm = true;
                     else rm = false;
@@ -259,7 +259,7 @@ namespace SDRAC.Classes
             public List<int> idListIn = null, idListOut = null;
             public Mutex mutexAdd = null, mutexRead = null;
             public Thread readLW= null, sendLW = null;
-            public long communicatsRecived = 0, notAcknowledgeRecived = 0, acknowledgeRecived = 0, passedCommunicats = 0, sthRecived=0;
+            public long communicatsRecived = 0, notAcknowledgeRecived = 0, acknowledgeRecived = 0, passedCommunicats = 0, sthRecived=0, sendedComunicats=0, sendedAliveCom=0;
 
             public void DefaultStart()
             {
@@ -725,7 +725,7 @@ namespace SDRAC.Classes
                                     {
                                         cd.notAck = true; cd.notAcknowledgeRecived++;
                                     }
-                                    else if(cm.code == cod.AckNowledge && cm.id != cd.msgIdAck)
+                                    else if(cm.code == cod.AckNowledge && cm.id != cd.msgIdAck &&  cm.rm)
                                     {
                                         AddError(idConnection,new ErrorClass() { id = 9, command = cm, shortMsg = "Id not confirmed!", longMsg = "in=>" + cm.id.ToString() + "   out=>" + cd.msgIdAck.ToString() });
                                     }        
@@ -786,7 +786,7 @@ namespace SDRAC.Classes
                     cd.mutexRead.WaitOne();
 
                     if (tAlive.ElapsedMilliseconds >= sendTimeout)
-                    { id++; Send(cd.socketCon, aliveC, id); cd.msgIdAck = id; tAlive.Restart(); }
+                    { id++; Send(cd.socketCon, aliveC, id); cd.msgIdAck = id; tAlive.Restart(); cd.sendedAliveCom++; }
 
                     cd.connected = true;
                     if (cd.connected)
@@ -806,6 +806,7 @@ namespace SDRAC.Classes
                         {
                             id++;
                             Send(cd.socketCon,currentCm, id);
+                            cd.sendedComunicats++;
                             cd.msgIdAck = id;
 
                             timer.Restart();

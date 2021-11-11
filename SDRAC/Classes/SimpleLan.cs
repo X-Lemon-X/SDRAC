@@ -205,6 +205,36 @@ namespace SDRAC.Classes
                 return dataf;
             }
 
+            public byte[] GetDataOnly()
+            {
+                return dataOnly;
+            }
+
+            public int GetCode()
+            {
+                return code;
+            }
+
+            public int GetSize()
+            {
+                return size;
+            }
+
+            public bool GetIfRespondType()
+            {
+                return rm;
+            }
+
+            public int GetSendingIdCommand()
+            {
+                return id;
+            }
+
+            public long GetIdOfMessage()
+            {
+                return idComand;
+            }
+
         }
 
         public class ErrorClass
@@ -757,10 +787,10 @@ namespace SDRAC.Classes
 
                     byte[] readedBuffor = new byte[bufferSize];
                     bool read = true;
-                    try { int g = cd.socketCon.Receive(readedBuffor); cd.sthRecived++; } catch (Exception ex) { read = false; }
+                    try { int g = cd.socketCon.Receive(readedBuffor); cd.sthRecived++; } catch (Exception) { read = false; }
 
                     int p = 0;
-                    if(readedBuffor.Length!=0)
+                    if(read)
                     foreach (byte singleByte in readedBuffor)
                     {
                         if (singleByte == (byte)'@')
@@ -781,15 +811,15 @@ namespace SDRAC.Classes
                                     cd.connected = true;
                                     cd.passedCommunicats++;
                                           
-                                    if (cm.code == ((int)ComunicationCodes.AckNowledge) && cm.id == cd.msgIdAck)
+                                    if (cm.GetCode() == ((int)ComunicationCodes.AckNowledge) && cm.GetSendingIdCommand() == cd.msgIdAck)
                                     {
                                         cd.ack = true; cd.acknowledgeRecived++;
                                     }
-                                    else if (cm.code == ((int)ComunicationCodes.NotAcknowledge) && cm.id==0)
+                                    else if (cm.GetCode() == ((int)ComunicationCodes.NotAcknowledge) && cm.GetSendingIdCommand() == 0)
                                     {
                                         cd.notAck = true; cd.notAcknowledgeRecived++;
                                     }
-                                    else if(cm.code == ((int)ComunicationCodes.AckNowledge)&& cm.id != cd.msgIdAck &&  cm.rm)
+                                    else if(cm.GetCode() == ((int)ComunicationCodes.AckNowledge)&& cm.GetSendingIdCommand() != cd.msgIdAck &&  cm.GetIfRespondType())
                                     {
                                         AddError(idConnection,new ErrorClass() { id = 9, command = cm, shortMsg = "Id not confirmed!", longMsg = "in=>" + cm.id.ToString() + "   out=>" + cd.msgIdAck.ToString() });
                                     }        

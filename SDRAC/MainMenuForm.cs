@@ -3487,7 +3487,6 @@ namespace SDRAC
             string adip = IPAddress.Any.ToString();
             errorListNumerous = new List<Classes.SimpleLan.ErrorClass>();
             simpleLan = new Classes.SimpleLan();
-            //simpleLan.EasySetup(128,150,25000,MainMenuForm.dataClass.Ip);
 
             Classes.SimpleLan.SetupClient sl = new Classes.SimpleLan.SetupClient();
             sl._defaultPort = 25000;
@@ -3499,11 +3498,9 @@ namespace SDRAC
 
             simpleLan.EventClassReturnHandler += SimpleLan_EventClassReturnHandler;
 
-            Classes.SimpleLan.SetupClient sc = new Classes.SimpleLan.SetupClient();
-
-            simpleLan.NewDataIncomeEvent += SimpleLan_NewDataIncomeEvent;
-            simpleLan.ErrorIncomingEvent += SimpleLan_ErrorIncomingEvent;
-            simpleLan.ConnectionStatusChangedEvent += SimpleLan_ConnectionStatusChangedEvent;
+            //simpleLan.NewDataIncomeEvent += SimpleLan_NewDataIncomeEvent;
+            //simpleLan.ErrorIncomingEvent += SimpleLan_ErrorIncomingEvent;
+            //simpleLan.ConnectionStatusChangedEvent += SimpleLan_ConnectionStatusChangedEvent;
             return simpleLan.Start();
 
         }
@@ -3518,6 +3515,12 @@ namespace SDRAC
         private void SimpleLan_ConnectionStatusChangedEvent(object sender, bool e)
         {
             MainMenuForm.dataClass.GetConInfo = e;
+        }
+
+        private void pictureBox1_Click_1(object sender, EventArgs e)
+        {
+            
+
         }
 
         private void SimpleLan_ErrorIncomingEvent(object sender, Classes.SimpleLan.ErrorClass e)

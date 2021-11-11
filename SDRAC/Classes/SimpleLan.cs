@@ -39,47 +39,45 @@ namespace SDRAC.Classes
         public List<ConnectionData> cdl = null;
         public List<ErrorClass> cListErrorsDef = new List<ErrorClass>();
         public int[] ConnectionIdL = null;
-        public Codes codes = new Codes();
-
         public event EventHandler<Command> NewDataIncomeEvent;
         public event EventHandler<ErrorClass> ErrorIncomingEvent;
         public event EventHandler<bool> ConnectionStatusChangedEvent;
         public event EventHandler<EventClassReturn> EventClassReturnHandler;
+        ConnectionType connectionType = ConnectionType.Null;
 
         // private static Mutex mutexAdd = new Mutex(), mutexRead = new Mutex();
         #endregion
 
         #region Setup veriables
-        public int bufferSize = 256;
-        public long connectionNoAnswearDelay = 500; //ms
-        public static int maxSizeOfOneMessage = 64;
-        public int reciveTimeout = 1000; //ms
-        public int sendTimeout = 500; //ms
-        public int oneMessageTimeout = 30; //ms
-        public int messagesTimeout = 400; //ms
-        public int receiveBufferSize = 8192;
-        public int defaultPort = 55000;
-        public string localIp = null;
-        public bool readingLanWifi = false;
-        public bool connected = false;
-        public string hostIp;
-        public bool SerwerOrClient = false; // true for server      false for client
-        public int maxHosts;
+        private int bufferSize = 256;
+        private long connectionNoAnswearDelay = 500; //ms
+        private static int maxSizeOfOneMessage = 64;
+        private int reciveTimeout = 1000; //ms
+        private int sendTimeout = 500; //ms
+        private int oneMessageTimeout = 30; //ms
+        private int messagesTimeout = 400; //ms
+        private int receiveBufferSize = 8192;
+        private int defaultPort = 55000;
+        private string localIp = null;
+        private string hostIp;
+        private int maxHosts;
         #endregion
 
         #region Classes
 
-        public class Codes
-        { 
-            private int _ackNowledge = 10;
-            private int _notAckNowledge = 11;
-            private int _portChange = 12;
-            private int _alive = 13;
+        public enum ComunicationCodes : int
+        {
+            AckNowledge = 10,
+            NotAcknowledge = 11,
+            PortChange = 12,
+            Alive = 13
+        }
 
-            public int AckNowledge { get => _ackNowledge; }
-            public int NotAckNowledge { get => _notAckNowledge; }
-            public int PortChange { get => _portChange; }
-            public int Alive { get => _alive;}
+        public enum ConnectionType
+        {
+            Serwer = 1,
+            Client = 2,
+            Null = 0
         }
 
         public class Command
@@ -182,15 +180,16 @@ namespace SDRAC.Classes
                     id = BytesToInt(ByteArrayCutter(_data, 5, 2));
                     
                     dataf = new byte[size + 5];
-                    if(size > 6) dataOnly = ByteArrayCutter(_data,10,size-6);
-                   
+                    if (size > 6) dataOnly = ByteArrayCutter(_data, 10, size - 6);
+
                     if (ByteArrayCutter(_data, 1, 1)[0] == (byte)'R') rm = true;
                     else rm = false;
 
                     int p = 0;
-                    foreach (byte item in _data) { dataf[p] = item; p++; }
+                    foreach (byte item in _data) 
+                    { dataf[p] = item; p++; }
 
-                    if (_data[7] == (byte)'G' && _data[size + 4] == (byte)'#' && size <= maxSizeOfOneMessage) return 0;
+                    if (_data[7] == (byte)'G' && _data[size + 4] == (byte)'#' && size <= maxSizeOfOneMessage) return 1;
                     else return -1;
                 }
                 catch (Exception) { return -2; }
@@ -341,27 +340,10 @@ namespace SDRAC.Classes
         #region SetupFunctions
 
         #region EasySetup
-        public int EasySetup(int _msgMaxSize,int _oneMessageTimeout, int _port, string _hostIp4)
-        {
-            maxSizeOfOneMessage = _msgMaxSize;
-            receiveBufferSize = _msgMaxSize * 64;
-            bufferSize = 2 * _msgMaxSize;
-            defaultPort = _port;
-            hostIp = _hostIp4;
-            localIp = LocalIp4();
-
-            oneMessageTimeout = _oneMessageTimeout;
-            messagesTimeout = _oneMessageTimeout * 10 + 100;
-            connectionNoAnswearDelay = messagesTimeout * 2;
-            reciveTimeout = messagesTimeout;
-            SerwerOrClient = false;
-            return 1;
-        }
-
         public int EasySetup(SetupClient sc)
         {
             maxSizeOfOneMessage = sc._msgMaxSize;
-            receiveBufferSize = sc._msgMaxSize * 64;
+            receiveBufferSize = sc._msgMaxSize * 16;
             bufferSize = 2 * sc._msgMaxSize;
             defaultPort = sc._defaultPort;
             hostIp = sc._hostIp4;
@@ -370,7 +352,7 @@ namespace SDRAC.Classes
             messagesTimeout = sc._oneMessageTimeout * 10 + 100;
             connectionNoAnswearDelay = messagesTimeout * 2;
             reciveTimeout = messagesTimeout;
-            SerwerOrClient = false;
+            connectionType = ConnectionType.Client;
             return 1;
         }
 
@@ -387,9 +369,8 @@ namespace SDRAC.Classes
             messagesTimeout = ss._oneMessageTimeout * 10 + 100;
             connectionNoAnswearDelay = messagesTimeout * 2;
             reciveTimeout = messagesTimeout;
-            SerwerOrClient = true;
-
-            return 0;
+            connectionType = ConnectionType.Serwer;
+            return 1;
         }
 
         #endregion
@@ -403,7 +384,7 @@ namespace SDRAC.Classes
                     try
                     {
                         Stop();
-                        if (SerwerOrClient) return SetSerwer();
+                        if (connectionType==ConnectionType.Serwer) return SetSerwer();
                         else return SetClient();
                     }
                     catch (Exception ex) { AddError(0, new ErrorClass() { id = 6, shortMsg = "Start() Error/Begining", longMsg = ex.ToString() }); }
@@ -417,7 +398,7 @@ namespace SDRAC.Classes
 
         public int Stop()
         {
-                if (SerwerOrClient) return StopSerwer();
+                if (connectionType==ConnectionType.Serwer) return StopSerwer();
                 else return StopClient();
         }
 
@@ -557,8 +538,7 @@ namespace SDRAC.Classes
         }
       
         #endregion
-
-        #region Public
+        
         public string LocalIp4()
         {
             string lP = null;
@@ -575,14 +555,16 @@ namespace SDRAC.Classes
                 }
                 else
                     AddError(0,new ErrorClass() { id = 11, shortMsg = "No network connection!" });
-                
             }
             catch (Exception e)
-            { AddError(0,new ErrorClass() { id = 10, shortMsg="Couldn't set local Ip!", longMsg=e.ToString()}); }
+            { 
+                AddError(0,new ErrorClass() { id = 10, shortMsg="Couldn't set local Ip!", longMsg=e.ToString()});
+            }
+
             return lP;
         }
 
-        #region ValueToBytes
+        #region Bytes manipulation
         public static byte[] ValueToBytes(long value, int length) //przy 0 MSB na dole LSB
         {
             byte[] data = new byte[length];
@@ -621,9 +603,6 @@ namespace SDRAC.Classes
 
             return data;
         }
-
-        #endregion
-
         public static int BytesToInt(byte[] bytes) //prszy 0 MSB na dole LSB
         {
             int value = 0;
@@ -674,21 +653,22 @@ namespace SDRAC.Classes
             catch (Exception) { }
             return arr;
         }
+
         #endregion
 
         #region Private
 
         private void ListenSerwerHandler(ConnectionData cd)
         {
-            Codes cod = new Codes();
+            
             Command cm, _notA = new Command(), _ack = new Command(), _portC = new Command();
             IPAddress hp = (Dns.Resolve(IPAddress.Any.ToString())).AddressList[0];
             IPEndPoint ep = new IPEndPoint(hp, defaultPort);
             Socket sm = cd.socketCon;
 
             sm.Bind(ep);
-            _notA.CreateNew(cod.NotAckNowledge, true);
-            _ack.CreateNew(cod.AckNowledge, true);
+            _notA.CreateNew(((int)ComunicationCodes.NotAcknowledge), true);
+            _ack.CreateNew(((int)ComunicationCodes.AckNowledge), true);
 
             bool read = true;
             while (cd.working)
@@ -713,7 +693,7 @@ namespace SDRAC.Classes
 
                                 if (cm.DecomposeCommand(data) >= 0)
                                 {
-                                    if (cm.code == cod.PortChange)
+                                    if (cm.code == ((int)ComunicationCodes.PortChange))
                                     {
                                         int portCheck = 25001;
                                         if (cdl.Count != 0 || cdl.Count < maxHosts)
@@ -725,7 +705,7 @@ namespace SDRAC.Classes
                                             if (portCheck > 65535) portCheck = 25001;         
                                         }
                                         int[] pch = { portCheck };
-                                        _portC.CreateNew(cod.PortChange, true, 2, pch);
+                                        _portC.CreateNew(((int)ComunicationCodes.PortChange), true, 2, pch);
                                         Send(sm, _portC, 0);
                                     }
                                 }
@@ -742,36 +722,55 @@ namespace SDRAC.Classes
             sm.Close();
         }
 
+        private byte[] ReciveSocketData(ConnectionData cd)
+        {
+            try 
+            {
+                byte[] readedBuffor = new byte[bufferSize];
+                cd.socketCon.Receive(readedBuffor); 
+                cd.sthRecived++;
+                return readedBuffor;
+            } 
+            catch (Exception ex) 
+            {
+                byte[] returnErrorBuffor = new byte[0];
+                return returnErrorBuffor;
+            }
+            
+        }
+
         private void ReadHandler(ConnectionData cd)
         {
-            Codes cod = new Codes();
             int idConnection = cd.id;
             Stopwatch sw = new Stopwatch(); sw.Start();
             Command cm, _notA = new Command(), _ack = new Command();
-            _notA.CreateNew(cod.NotAckNowledge,true);
-            _ack.CreateNew(cod.AckNowledge,true);
+            _notA.CreateNew(((int)ComunicationCodes.NotAcknowledge),true);
+            _ack.CreateNew(((int)ComunicationCodes.AckNowledge),true);
+         
             int[] empty ={0};
 
             while (cd.working)
             {
                 try
                 {
-                    byte[] readB = new byte[bufferSize];
+                    //byte[] readedBuffor = ReciveSocketData(cd);
+
+                    byte[] readedBuffor = new byte[bufferSize];
                     bool read = true;
-                    try { int g = cd.socketCon.Receive(readB); cd.sthRecived++; } catch (Exception ex) { read = false; }
+                    try { int g = cd.socketCon.Receive(readedBuffor); cd.sthRecived++; } catch (Exception ex) { read = false; }
 
                     int p = 0;
-                    if(read)
-                    foreach (byte item in readB)
+                    if(readedBuffor.Length!=0)
+                    foreach (byte singleByte in readedBuffor)
                     {
-                        if (item == (byte)'@')
+                        if (singleByte == (byte)'@')
                         {
                             // @  R|M (3nb size) (2nb msgNumber) G (2 nb code) [data] #
                             
-                            int size = BytesToInt(ByteArrayCutter(readB, p + 2, 3));
+                            int size = BytesToInt(ByteArrayCutter(readedBuffor, p + 2, 3));
                             if (size <= maxSizeOfOneMessage)
                             {
-                                byte[] data = ByteArrayCutter(readB, p, size + 5);
+                                byte[] data = ByteArrayCutter(readedBuffor, p, size + 5);
                                 cm = new Command();
 
                                 cd.communicatsRecived++;
@@ -781,16 +780,16 @@ namespace SDRAC.Classes
                                 {
                                     cd.connected = true;
                                     cd.passedCommunicats++;
-
-                                    if (cm.code == cod.AckNowledge && cm.id == cd.msgIdAck)
+                                          
+                                    if (cm.code == ((int)ComunicationCodes.AckNowledge) && cm.id == cd.msgIdAck)
                                     {
                                         cd.ack = true; cd.acknowledgeRecived++;
                                     }
-                                    else if (cm.code == cod.NotAckNowledge && cm.id==0)
+                                    else if (cm.code == ((int)ComunicationCodes.NotAcknowledge) && cm.id==0)
                                     {
                                         cd.notAck = true; cd.notAcknowledgeRecived++;
                                     }
-                                    else if(cm.code == cod.AckNowledge && cm.id != cd.msgIdAck &&  cm.rm)
+                                    else if(cm.code == ((int)ComunicationCodes.AckNowledge)&& cm.id != cd.msgIdAck &&  cm.rm)
                                     {
                                         AddError(idConnection,new ErrorClass() { id = 9, command = cm, shortMsg = "Id not confirmed!", longMsg = "in=>" + cm.id.ToString() + "   out=>" + cd.msgIdAck.ToString() });
                                     }        
@@ -831,7 +830,6 @@ namespace SDRAC.Classes
         private void SendHendler(ConnectionData cd)
         {
             int idConnection = cd.id;
-            Codes cod = new Codes();
             //ConnectionData cd = null;
 
             //if (idConnection >=0) cd = cdl.Find(e => e.id == idConnection);
@@ -839,7 +837,7 @@ namespace SDRAC.Classes
 
             Stopwatch timer = Stopwatch.StartNew(), tAlive = Stopwatch.StartNew();
             Command aliveC = new Command(), currentCm = null;
-            aliveC.CreateNew(cod.Alive, false);
+            aliveC.CreateNew(((int)ComunicationCodes.Alive), false);
 
             int counter = 0;
             bool wait = false, elap = false;
@@ -927,10 +925,9 @@ namespace SDRAC.Classes
         private void SendHendlerPriority(ConnectionData cd)
         {
             int idConnection = cd.id;
-            Codes cod = new Codes();
             Stopwatch timer = Stopwatch.StartNew(), tAlive = Stopwatch.StartNew();
             Command aliveC = new Command(), currentCm = null;
-            aliveC.CreateNew(cod.Alive, false);
+            aliveC.CreateNew(((int)ComunicationCodes.Alive), false);
             cd.commandPriority = cd.cpError;
             int counter = 0;
             bool wait = false, elap = false;

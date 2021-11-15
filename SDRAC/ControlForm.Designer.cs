@@ -66,13 +66,13 @@
             this.nudX = new System.Windows.Forms.NumericUpDown();
             this.nudY = new System.Windows.Forms.NumericUpDown();
             this.nudZ = new System.Windows.Forms.NumericUpDown();
-            this.panelManualJ = new System.Windows.Forms.Panel();
             this.labelJ1 = new System.Windows.Forms.Label();
-            this.labelJ2 = new System.Windows.Forms.Label();
-            this.labelJ3 = new System.Windows.Forms.Label();
+            this.panelManualJ = new System.Windows.Forms.Panel();
             this.nudJ1 = new System.Windows.Forms.NumericUpDown();
             this.nudJ3 = new System.Windows.Forms.NumericUpDown();
             this.nudJ2 = new System.Windows.Forms.NumericUpDown();
+            this.labelJ2 = new System.Windows.Forms.Label();
+            this.labelJ3 = new System.Windows.Forms.Label();
             this.panel9 = new System.Windows.Forms.Panel();
             this.timer = new System.Windows.Forms.Timer(this.components);
             this.numericUpDownVelo = new System.Windows.Forms.NumericUpDown();
@@ -775,6 +775,18 @@
             this.nudZ.Size = new System.Drawing.Size(86, 26);
             this.nudZ.TabIndex = 27;
             // 
+            // labelJ1
+            // 
+            this.labelJ1.Anchor = System.Windows.Forms.AnchorStyles.Top;
+            this.labelJ1.AutoSize = true;
+            this.labelJ1.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F);
+            this.labelJ1.ForeColor = System.Drawing.Color.White;
+            this.labelJ1.Location = new System.Drawing.Point(371, 12);
+            this.labelJ1.Name = "labelJ1";
+            this.labelJ1.Size = new System.Drawing.Size(80, 25);
+            this.labelJ1.TabIndex = 12;
+            this.labelJ1.Text = "(00.00)";
+            // 
             // panelManualJ
             // 
             this.panelManualJ.Anchor = System.Windows.Forms.AnchorStyles.Top;
@@ -789,39 +801,6 @@
             this.panelManualJ.Name = "panelManualJ";
             this.panelManualJ.Size = new System.Drawing.Size(136, 89);
             this.panelManualJ.TabIndex = 36;
-            // 
-            // labelJ1
-            // 
-            this.labelJ1.AutoSize = true;
-            this.labelJ1.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F);
-            this.labelJ1.ForeColor = System.Drawing.Color.White;
-            this.labelJ1.Location = new System.Drawing.Point(371, 12);
-            this.labelJ1.Name = "labelJ1";
-            this.labelJ1.Size = new System.Drawing.Size(80, 25);
-            this.labelJ1.TabIndex = 12;
-            this.labelJ1.Text = "(00.00)";
-            // 
-            // labelJ2
-            // 
-            this.labelJ2.AutoSize = true;
-            this.labelJ2.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F);
-            this.labelJ2.ForeColor = System.Drawing.Color.White;
-            this.labelJ2.Location = new System.Drawing.Point(371, 38);
-            this.labelJ2.Name = "labelJ2";
-            this.labelJ2.Size = new System.Drawing.Size(80, 25);
-            this.labelJ2.TabIndex = 13;
-            this.labelJ2.Text = "(00.00)";
-            // 
-            // labelJ3
-            // 
-            this.labelJ3.AutoSize = true;
-            this.labelJ3.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F);
-            this.labelJ3.ForeColor = System.Drawing.Color.White;
-            this.labelJ3.Location = new System.Drawing.Point(371, 62);
-            this.labelJ3.Name = "labelJ3";
-            this.labelJ3.Size = new System.Drawing.Size(80, 25);
-            this.labelJ3.TabIndex = 14;
-            this.labelJ3.Text = "(00.00)";
             // 
             // nudJ1
             // 
@@ -876,6 +855,30 @@
             this.nudJ2.Name = "nudJ2";
             this.nudJ2.Size = new System.Drawing.Size(88, 26);
             this.nudJ2.TabIndex = 29;
+            // 
+            // labelJ2
+            // 
+            this.labelJ2.Anchor = System.Windows.Forms.AnchorStyles.Top;
+            this.labelJ2.AutoSize = true;
+            this.labelJ2.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F);
+            this.labelJ2.ForeColor = System.Drawing.Color.White;
+            this.labelJ2.Location = new System.Drawing.Point(371, 38);
+            this.labelJ2.Name = "labelJ2";
+            this.labelJ2.Size = new System.Drawing.Size(80, 25);
+            this.labelJ2.TabIndex = 13;
+            this.labelJ2.Text = "(00.00)";
+            // 
+            // labelJ3
+            // 
+            this.labelJ3.Anchor = System.Windows.Forms.AnchorStyles.Top;
+            this.labelJ3.AutoSize = true;
+            this.labelJ3.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F);
+            this.labelJ3.ForeColor = System.Drawing.Color.White;
+            this.labelJ3.Location = new System.Drawing.Point(371, 62);
+            this.labelJ3.Name = "labelJ3";
+            this.labelJ3.Size = new System.Drawing.Size(80, 25);
+            this.labelJ3.TabIndex = 14;
+            this.labelJ3.Text = "(00.00)";
             // 
             // panel9
             // 

@@ -84,6 +84,22 @@
             this.listBoxErrorList = new System.Windows.Forms.ListBox();
             this.label27 = new System.Windows.Forms.Label();
             this.timerUpdateLog = new System.Windows.Forms.Timer(this.components);
+            this.panel8 = new System.Windows.Forms.Panel();
+            this.numericUpDownJ1Offset = new System.Windows.Forms.NumericUpDown();
+            this.label46 = new System.Windows.Forms.Label();
+            this.label45 = new System.Windows.Forms.Label();
+            this.numericUpDownJ2Offset = new System.Windows.Forms.NumericUpDown();
+            this.label42 = new System.Windows.Forms.Label();
+            this.numericUpDownJ3Offset = new System.Windows.Forms.NumericUpDown();
+            this.label39 = new System.Windows.Forms.Label();
+            this.numericUpDownJ4Offset = new System.Windows.Forms.NumericUpDown();
+            this.label36 = new System.Windows.Forms.Label();
+            this.numericUpDownJ5Offset = new System.Windows.Forms.NumericUpDown();
+            this.label33 = new System.Windows.Forms.Label();
+            this.numericUpDownJ6Offset = new System.Windows.Forms.NumericUpDown();
+            this.label30 = new System.Windows.Forms.Label();
+            this.iconButton1 = new FontAwesome.Sharp.IconButton();
+            this.panel7 = new System.Windows.Forms.Panel();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDownX)).BeginInit();
             this.panel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.j6n)).BeginInit();
@@ -102,6 +118,13 @@
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDownZ)).BeginInit();
             this.panel3.SuspendLayout();
             this.panel6.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.numericUpDownJ1Offset)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numericUpDownJ2Offset)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numericUpDownJ3Offset)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numericUpDownJ4Offset)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numericUpDownJ5Offset)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numericUpDownJ6Offset)).BeginInit();
+            this.panel7.SuspendLayout();
             this.SuspendLayout();
             // 
             // textBoxName
@@ -131,17 +154,16 @@
             // 
             this.iconButtonAddTool.FlatAppearance.BorderSize = 0;
             this.iconButtonAddTool.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.iconButtonAddTool.Flip = FontAwesome.Sharp.FlipOrientation.Normal;
             this.iconButtonAddTool.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
             this.iconButtonAddTool.ForeColor = System.Drawing.Color.DarkGray;
             this.iconButtonAddTool.IconChar = FontAwesome.Sharp.IconChar.Plus;
             this.iconButtonAddTool.IconColor = System.Drawing.Color.DarkGray;
+            this.iconButtonAddTool.IconFont = FontAwesome.Sharp.IconFont.Auto;
             this.iconButtonAddTool.IconSize = 32;
             this.iconButtonAddTool.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
             this.iconButtonAddTool.Location = new System.Drawing.Point(20, 178);
             this.iconButtonAddTool.Name = "iconButtonAddTool";
             this.iconButtonAddTool.Padding = new System.Windows.Forms.Padding(10, 0, 20, 0);
-            this.iconButtonAddTool.Rotation = 0D;
             this.iconButtonAddTool.Size = new System.Drawing.Size(160, 50);
             this.iconButtonAddTool.TabIndex = 6;
             this.iconButtonAddTool.Text = "  Add Tool";
@@ -240,17 +262,16 @@
             this.iconButtonSaveJ.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.iconButtonSaveJ.FlatAppearance.BorderSize = 0;
             this.iconButtonSaveJ.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.iconButtonSaveJ.Flip = FontAwesome.Sharp.FlipOrientation.Normal;
             this.iconButtonSaveJ.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
             this.iconButtonSaveJ.ForeColor = System.Drawing.Color.DarkGray;
             this.iconButtonSaveJ.IconChar = FontAwesome.Sharp.IconChar.Save;
             this.iconButtonSaveJ.IconColor = System.Drawing.Color.DarkGray;
+            this.iconButtonSaveJ.IconFont = FontAwesome.Sharp.IconFont.Auto;
             this.iconButtonSaveJ.IconSize = 32;
             this.iconButtonSaveJ.ImageAlign = System.Drawing.ContentAlignment.MiddleRight;
             this.iconButtonSaveJ.Location = new System.Drawing.Point(12, 548);
             this.iconButtonSaveJ.Name = "iconButtonSaveJ";
             this.iconButtonSaveJ.Padding = new System.Windows.Forms.Padding(10, 0, 20, 0);
-            this.iconButtonSaveJ.Rotation = 0D;
             this.iconButtonSaveJ.Size = new System.Drawing.Size(174, 46);
             this.iconButtonSaveJ.TabIndex = 45;
             this.iconButtonSaveJ.Text = " Set";
@@ -852,17 +873,16 @@
             this.iconButtonRemove.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.iconButtonRemove.FlatAppearance.BorderSize = 0;
             this.iconButtonRemove.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.iconButtonRemove.Flip = FontAwesome.Sharp.FlipOrientation.Normal;
             this.iconButtonRemove.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
             this.iconButtonRemove.ForeColor = System.Drawing.Color.DarkGray;
             this.iconButtonRemove.IconChar = FontAwesome.Sharp.IconChar.Plus;
             this.iconButtonRemove.IconColor = System.Drawing.Color.DarkGray;
+            this.iconButtonRemove.IconFont = FontAwesome.Sharp.IconFont.Auto;
             this.iconButtonRemove.IconSize = 32;
             this.iconButtonRemove.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
             this.iconButtonRemove.Location = new System.Drawing.Point(20, 548);
             this.iconButtonRemove.Name = "iconButtonRemove";
             this.iconButtonRemove.Padding = new System.Windows.Forms.Padding(10, 0, 20, 0);
-            this.iconButtonRemove.Rotation = 0D;
             this.iconButtonRemove.Size = new System.Drawing.Size(160, 46);
             this.iconButtonRemove.TabIndex = 18;
             this.iconButtonRemove.Text = " Remove";
@@ -928,9 +948,9 @@
             // 
             // panel4
             // 
-            this.panel4.Anchor = System.Windows.Forms.AnchorStyles.Top;
             this.panel4.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(35)))), ((int)(((byte)(35)))), ((int)(((byte)(35)))));
-            this.panel4.Location = new System.Drawing.Point(559, 0);
+            this.panel4.Dock = System.Windows.Forms.DockStyle.Right;
+            this.panel4.Location = new System.Drawing.Point(553, 0);
             this.panel4.Name = "panel4";
             this.panel4.Size = new System.Drawing.Size(6, 604);
             this.panel4.TabIndex = 17;
@@ -958,7 +978,7 @@
             this.listBoxErrorList.ItemHeight = 16;
             this.listBoxErrorList.Location = new System.Drawing.Point(12, 33);
             this.listBoxErrorList.Name = "listBoxErrorList";
-            this.listBoxErrorList.Size = new System.Drawing.Size(541, 559);
+            this.listBoxErrorList.Size = new System.Drawing.Size(323, 559);
             this.listBoxErrorList.TabIndex = 24;
             // 
             // label27
@@ -966,7 +986,7 @@
             this.label27.AutoSize = true;
             this.label27.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label27.ForeColor = System.Drawing.Color.DarkGray;
-            this.label27.Location = new System.Drawing.Point(258, 6);
+            this.label27.Location = new System.Drawing.Point(12, 9);
             this.label27.Name = "label27";
             this.label27.Size = new System.Drawing.Size(45, 24);
             this.label27.TabIndex = 25;
@@ -978,12 +998,284 @@
             this.timerUpdateLog.Interval = 250;
             this.timerUpdateLog.Tick += new System.EventHandler(this.timerUpdateLog_Tick);
             // 
+            // panel8
+            // 
+            this.panel8.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(35)))), ((int)(((byte)(35)))), ((int)(((byte)(35)))));
+            this.panel8.Dock = System.Windows.Forms.DockStyle.Right;
+            this.panel8.Location = new System.Drawing.Point(349, 0);
+            this.panel8.Name = "panel8";
+            this.panel8.Size = new System.Drawing.Size(6, 604);
+            this.panel8.TabIndex = 27;
+            // 
+            // numericUpDownJ1Offset
+            // 
+            this.numericUpDownJ1Offset.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.numericUpDownJ1Offset.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(45)))), ((int)(((byte)(45)))), ((int)(((byte)(45)))));
+            this.numericUpDownJ1Offset.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.numericUpDownJ1Offset.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
+            this.numericUpDownJ1Offset.ForeColor = System.Drawing.Color.White;
+            this.numericUpDownJ1Offset.Location = new System.Drawing.Point(49, 51);
+            this.numericUpDownJ1Offset.Maximum = new decimal(new int[] {
+            4095,
+            0,
+            0,
+            0});
+            this.numericUpDownJ1Offset.Minimum = new decimal(new int[] {
+            4095,
+            0,
+            0,
+            -2147483648});
+            this.numericUpDownJ1Offset.Name = "numericUpDownJ1Offset";
+            this.numericUpDownJ1Offset.Size = new System.Drawing.Size(134, 22);
+            this.numericUpDownJ1Offset.TabIndex = 10;
+            // 
+            // label46
+            // 
+            this.label46.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.label46.AutoSize = true;
+            this.label46.Font = new System.Drawing.Font("Microsoft Sans Serif", 12.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
+            this.label46.ForeColor = System.Drawing.Color.DarkGray;
+            this.label46.Location = new System.Drawing.Point(8, 50);
+            this.label46.Name = "label46";
+            this.label46.Size = new System.Drawing.Size(35, 20);
+            this.label46.TabIndex = 11;
+            this.label46.Text = "J1:";
+            // 
+            // label45
+            // 
+            this.label45.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.label45.AutoSize = true;
+            this.label45.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label45.ForeColor = System.Drawing.Color.DarkGray;
+            this.label45.Location = new System.Drawing.Point(38, 9);
+            this.label45.Name = "label45";
+            this.label45.Size = new System.Drawing.Size(123, 24);
+            this.label45.TabIndex = 16;
+            this.label45.Text = "Joints Offset";
+            // 
+            // numericUpDownJ2Offset
+            // 
+            this.numericUpDownJ2Offset.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.numericUpDownJ2Offset.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(45)))), ((int)(((byte)(45)))), ((int)(((byte)(45)))));
+            this.numericUpDownJ2Offset.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.numericUpDownJ2Offset.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
+            this.numericUpDownJ2Offset.ForeColor = System.Drawing.Color.White;
+            this.numericUpDownJ2Offset.Location = new System.Drawing.Point(49, 79);
+            this.numericUpDownJ2Offset.Maximum = new decimal(new int[] {
+            4095,
+            0,
+            0,
+            0});
+            this.numericUpDownJ2Offset.Minimum = new decimal(new int[] {
+            4095,
+            0,
+            0,
+            -2147483648});
+            this.numericUpDownJ2Offset.Name = "numericUpDownJ2Offset";
+            this.numericUpDownJ2Offset.Size = new System.Drawing.Size(134, 22);
+            this.numericUpDownJ2Offset.TabIndex = 20;
+            // 
+            // label42
+            // 
+            this.label42.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.label42.AutoSize = true;
+            this.label42.Font = new System.Drawing.Font("Microsoft Sans Serif", 12.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
+            this.label42.ForeColor = System.Drawing.Color.DarkGray;
+            this.label42.Location = new System.Drawing.Point(8, 78);
+            this.label42.Name = "label42";
+            this.label42.Size = new System.Drawing.Size(35, 20);
+            this.label42.TabIndex = 21;
+            this.label42.Text = "J2:";
+            // 
+            // numericUpDownJ3Offset
+            // 
+            this.numericUpDownJ3Offset.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.numericUpDownJ3Offset.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(45)))), ((int)(((byte)(45)))), ((int)(((byte)(45)))));
+            this.numericUpDownJ3Offset.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.numericUpDownJ3Offset.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
+            this.numericUpDownJ3Offset.ForeColor = System.Drawing.Color.White;
+            this.numericUpDownJ3Offset.Location = new System.Drawing.Point(49, 107);
+            this.numericUpDownJ3Offset.Maximum = new decimal(new int[] {
+            4095,
+            0,
+            0,
+            0});
+            this.numericUpDownJ3Offset.Minimum = new decimal(new int[] {
+            4095,
+            0,
+            0,
+            -2147483648});
+            this.numericUpDownJ3Offset.Name = "numericUpDownJ3Offset";
+            this.numericUpDownJ3Offset.Size = new System.Drawing.Size(134, 22);
+            this.numericUpDownJ3Offset.TabIndex = 25;
+            // 
+            // label39
+            // 
+            this.label39.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.label39.AutoSize = true;
+            this.label39.Font = new System.Drawing.Font("Microsoft Sans Serif", 12.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
+            this.label39.ForeColor = System.Drawing.Color.DarkGray;
+            this.label39.Location = new System.Drawing.Point(8, 106);
+            this.label39.Name = "label39";
+            this.label39.Size = new System.Drawing.Size(35, 20);
+            this.label39.TabIndex = 26;
+            this.label39.Text = "J3:";
+            // 
+            // numericUpDownJ4Offset
+            // 
+            this.numericUpDownJ4Offset.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.numericUpDownJ4Offset.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(45)))), ((int)(((byte)(45)))), ((int)(((byte)(45)))));
+            this.numericUpDownJ4Offset.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.numericUpDownJ4Offset.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
+            this.numericUpDownJ4Offset.ForeColor = System.Drawing.Color.White;
+            this.numericUpDownJ4Offset.Location = new System.Drawing.Point(49, 135);
+            this.numericUpDownJ4Offset.Maximum = new decimal(new int[] {
+            4095,
+            0,
+            0,
+            0});
+            this.numericUpDownJ4Offset.Minimum = new decimal(new int[] {
+            4095,
+            0,
+            0,
+            -2147483648});
+            this.numericUpDownJ4Offset.Name = "numericUpDownJ4Offset";
+            this.numericUpDownJ4Offset.Size = new System.Drawing.Size(134, 22);
+            this.numericUpDownJ4Offset.TabIndex = 30;
+            // 
+            // label36
+            // 
+            this.label36.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.label36.AutoSize = true;
+            this.label36.Font = new System.Drawing.Font("Microsoft Sans Serif", 12.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
+            this.label36.ForeColor = System.Drawing.Color.DarkGray;
+            this.label36.Location = new System.Drawing.Point(8, 134);
+            this.label36.Name = "label36";
+            this.label36.Size = new System.Drawing.Size(35, 20);
+            this.label36.TabIndex = 31;
+            this.label36.Text = "J4:";
+            // 
+            // numericUpDownJ5Offset
+            // 
+            this.numericUpDownJ5Offset.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.numericUpDownJ5Offset.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(45)))), ((int)(((byte)(45)))), ((int)(((byte)(45)))));
+            this.numericUpDownJ5Offset.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.numericUpDownJ5Offset.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
+            this.numericUpDownJ5Offset.ForeColor = System.Drawing.Color.White;
+            this.numericUpDownJ5Offset.Location = new System.Drawing.Point(49, 163);
+            this.numericUpDownJ5Offset.Maximum = new decimal(new int[] {
+            4095,
+            0,
+            0,
+            0});
+            this.numericUpDownJ5Offset.Minimum = new decimal(new int[] {
+            4095,
+            0,
+            0,
+            -2147483648});
+            this.numericUpDownJ5Offset.Name = "numericUpDownJ5Offset";
+            this.numericUpDownJ5Offset.Size = new System.Drawing.Size(134, 22);
+            this.numericUpDownJ5Offset.TabIndex = 35;
+            // 
+            // label33
+            // 
+            this.label33.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.label33.AutoSize = true;
+            this.label33.Font = new System.Drawing.Font("Microsoft Sans Serif", 12.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
+            this.label33.ForeColor = System.Drawing.Color.DarkGray;
+            this.label33.Location = new System.Drawing.Point(8, 162);
+            this.label33.Name = "label33";
+            this.label33.Size = new System.Drawing.Size(35, 20);
+            this.label33.TabIndex = 36;
+            this.label33.Text = "J5:";
+            // 
+            // numericUpDownJ6Offset
+            // 
+            this.numericUpDownJ6Offset.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.numericUpDownJ6Offset.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(45)))), ((int)(((byte)(45)))), ((int)(((byte)(45)))));
+            this.numericUpDownJ6Offset.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.numericUpDownJ6Offset.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
+            this.numericUpDownJ6Offset.ForeColor = System.Drawing.Color.White;
+            this.numericUpDownJ6Offset.Location = new System.Drawing.Point(49, 191);
+            this.numericUpDownJ6Offset.Maximum = new decimal(new int[] {
+            4095,
+            0,
+            0,
+            0});
+            this.numericUpDownJ6Offset.Minimum = new decimal(new int[] {
+            4095,
+            0,
+            0,
+            -2147483648});
+            this.numericUpDownJ6Offset.Name = "numericUpDownJ6Offset";
+            this.numericUpDownJ6Offset.Size = new System.Drawing.Size(134, 22);
+            this.numericUpDownJ6Offset.TabIndex = 40;
+            // 
+            // label30
+            // 
+            this.label30.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.label30.AutoSize = true;
+            this.label30.Font = new System.Drawing.Font("Microsoft Sans Serif", 12.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
+            this.label30.ForeColor = System.Drawing.Color.DarkGray;
+            this.label30.Location = new System.Drawing.Point(8, 190);
+            this.label30.Name = "label30";
+            this.label30.Size = new System.Drawing.Size(35, 20);
+            this.label30.TabIndex = 41;
+            this.label30.Text = "J6:";
+            // 
+            // iconButton1
+            // 
+            this.iconButton1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.iconButton1.FlatAppearance.BorderSize = 0;
+            this.iconButton1.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.iconButton1.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
+            this.iconButton1.ForeColor = System.Drawing.Color.DarkGray;
+            this.iconButton1.IconChar = FontAwesome.Sharp.IconChar.Save;
+            this.iconButton1.IconColor = System.Drawing.Color.DarkGray;
+            this.iconButton1.IconFont = FontAwesome.Sharp.IconFont.Auto;
+            this.iconButton1.IconSize = 32;
+            this.iconButton1.ImageAlign = System.Drawing.ContentAlignment.MiddleRight;
+            this.iconButton1.Location = new System.Drawing.Point(12, 231);
+            this.iconButton1.Name = "iconButton1";
+            this.iconButton1.Padding = new System.Windows.Forms.Padding(10, 0, 20, 0);
+            this.iconButton1.Size = new System.Drawing.Size(174, 46);
+            this.iconButton1.TabIndex = 45;
+            this.iconButton1.Text = " Set";
+            this.iconButton1.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
+            this.iconButton1.UseVisualStyleBackColor = true;
+            this.iconButton1.Click += new System.EventHandler(this.iconButton1_Click);
+            // 
+            // panel7
+            // 
+            this.panel7.Controls.Add(this.iconButton1);
+            this.panel7.Controls.Add(this.label30);
+            this.panel7.Controls.Add(this.numericUpDownJ6Offset);
+            this.panel7.Controls.Add(this.label33);
+            this.panel7.Controls.Add(this.numericUpDownJ5Offset);
+            this.panel7.Controls.Add(this.label36);
+            this.panel7.Controls.Add(this.numericUpDownJ4Offset);
+            this.panel7.Controls.Add(this.label39);
+            this.panel7.Controls.Add(this.numericUpDownJ3Offset);
+            this.panel7.Controls.Add(this.label42);
+            this.panel7.Controls.Add(this.numericUpDownJ2Offset);
+            this.panel7.Controls.Add(this.label45);
+            this.panel7.Controls.Add(this.label46);
+            this.panel7.Controls.Add(this.numericUpDownJ1Offset);
+            this.panel7.Dock = System.Windows.Forms.DockStyle.Right;
+            this.panel7.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
+            this.panel7.Location = new System.Drawing.Point(355, 0);
+            this.panel7.Name = "panel7";
+            this.panel7.Size = new System.Drawing.Size(198, 604);
+            this.panel7.TabIndex = 26;
+            // 
             // ParametersForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(40)))), ((int)(((byte)(40)))), ((int)(((byte)(40)))));
             this.ClientSize = new System.Drawing.Size(961, 604);
+            this.Controls.Add(this.panel8);
+            this.Controls.Add(this.panel7);
             this.Controls.Add(this.label27);
             this.Controls.Add(this.listBoxErrorList);
             this.Controls.Add(this.panel4);
@@ -1015,6 +1307,14 @@
             this.panel3.PerformLayout();
             this.panel6.ResumeLayout(false);
             this.panel6.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.numericUpDownJ1Offset)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numericUpDownJ2Offset)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numericUpDownJ3Offset)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numericUpDownJ4Offset)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numericUpDownJ5Offset)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numericUpDownJ6Offset)).EndInit();
+            this.panel7.ResumeLayout(false);
+            this.panel7.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -1077,5 +1377,21 @@
         private System.Windows.Forms.ListBox listBoxErrorList;
         private System.Windows.Forms.Label label27;
         private System.Windows.Forms.Timer timerUpdateLog;
+        private System.Windows.Forms.Panel panel8;
+        private System.Windows.Forms.NumericUpDown numericUpDownJ1Offset;
+        private System.Windows.Forms.Label label46;
+        private System.Windows.Forms.Label label45;
+        private System.Windows.Forms.NumericUpDown numericUpDownJ2Offset;
+        private System.Windows.Forms.Label label42;
+        private System.Windows.Forms.NumericUpDown numericUpDownJ3Offset;
+        private System.Windows.Forms.Label label39;
+        private System.Windows.Forms.NumericUpDown numericUpDownJ4Offset;
+        private System.Windows.Forms.Label label36;
+        private System.Windows.Forms.NumericUpDown numericUpDownJ5Offset;
+        private System.Windows.Forms.Label label33;
+        private System.Windows.Forms.NumericUpDown numericUpDownJ6Offset;
+        private System.Windows.Forms.Label label30;
+        private FontAwesome.Sharp.IconButton iconButton1;
+        private System.Windows.Forms.Panel panel7;
     }
 }

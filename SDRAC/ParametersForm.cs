@@ -24,6 +24,25 @@ namespace SDRAC
             
             UpdateListBox();
             UpdateJointLimitsView();
+            UpdateOffsetsValues();
+        }
+
+        private void UpdateOffsetsValues()
+        {
+            int[] offsets = MainMenuForm.dataClass.JointsOffsetValues;
+            int o = 0;
+            foreach (int item in offsets)
+            {
+                if (item > 10000) offsets[o] = -(item - 10000);
+                o++;
+            }
+
+            numericUpDownJ1Offset.Value = Convert.ToDecimal(offsets[0]);
+            numericUpDownJ2Offset.Value = Convert.ToDecimal(offsets[1]);
+            numericUpDownJ3Offset.Value = Convert.ToDecimal(offsets[2]);
+            numericUpDownJ4Offset.Value = Convert.ToDecimal(offsets[3]);
+            numericUpDownJ5Offset.Value = Convert.ToDecimal(offsets[4]);
+            numericUpDownJ6Offset.Value = Convert.ToDecimal(offsets[5]);
         }
 
         #region Functions
@@ -171,6 +190,28 @@ namespace SDRAC
                 }
                 countLog = i;
             }
+        }
+
+        private void iconButton1_Click(object sender, EventArgs e)
+        {
+            int[] data = new int[6];
+
+            data[0] = Convert.ToInt32(numericUpDownJ1Offset.Value);
+            data[1] = Convert.ToInt32(numericUpDownJ2Offset.Value);
+            data[2] = Convert.ToInt32(numericUpDownJ3Offset.Value);
+            data[3] = Convert.ToInt32(numericUpDownJ4Offset.Value);
+            data[4] = Convert.ToInt32(numericUpDownJ5Offset.Value);
+            data[5] = Convert.ToInt32(numericUpDownJ6Offset.Value);
+
+            int p = 0;
+            foreach (int item in data)
+            {
+                if (item < 0) data[p] = Math.Abs(item) + 10000;
+                p++;
+            }
+
+            MainMenuForm.dataClass.JointsOffsetValues = data;
+            MainMenuForm.dataClass.UpdateOffset = true;
         }
     }
 }

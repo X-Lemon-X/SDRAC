@@ -1253,12 +1253,13 @@ namespace SDRAC
             string data;
            
             int[] vel = new int[8];
-            for (int i = 0; i < 6;)
+            for (int i = 0; i < 6; )
             {
                 vel[i] = Convert.ToInt32(MainMenuForm.dataClass.SpeedManula[i] / 360.0 * MainMenuForm.dataClass.VelScale * dataClass.GearReduction[i]);
+                i++;
             }
-            vel[7] = MainMenuForm.dataClass.Acceleration;
-            vel[8] = MainMenuForm.dataClass.Deacceleration;
+            vel[6] = MainMenuForm.dataClass.Acceleration;
+            vel[7] = MainMenuForm.dataClass.Deacceleration;
 
             Classes.SimpleLan.Command cm = new Classes.SimpleLan.Command();
             cm.CreateNew(35, false, 2, vel);
@@ -1314,7 +1315,7 @@ namespace SDRAC
             
             foreach (double item in  MainMenuForm.dataClass.Jo)
             {
-                double g = item / 360 * resulution;
+                double g = item / 360 * MainMenuForm.dataClass.GearReduction[i];
                 dat[i] = Convert.ToInt32(g);
                 i++;
             }
@@ -2893,6 +2894,7 @@ namespace SDRAC
             ToolC tc = new ToolC();
 
             double[] limits = new double[12];
+            int[] offsets = new int[6];
             try
             {
                 if (System.IO.File.Exists(appPath))
@@ -2924,6 +2926,7 @@ namespace SDRAC
                                     case "tool": underType = 1; con = new bool[12]; break;
                                     case "limits": type = 2; con = new bool[12]; break;
                                     case "Conection": type = 3; con = new bool[12]; break;
+                                    case "Offsets": type = 4; con = new bool[12]; break;
                                     default:
                                         break;
                                 }
@@ -2992,6 +2995,38 @@ namespace SDRAC
                                             else if (name == "pass") { MainMenuForm.dataClass.Pass = value;  value = null; name = null; }
                                         }
                                         break;
+                                    case 4:
+                                        for (int i = 0; i < 6;)
+                                        {
+                                            if (name != "Offsets" && value != null)
+                                            {
+                                                try
+                                                {
+                                                    if (name == "offset" + i.ToString())
+                                                    {
+                                                        offsets[i] = Convert.ToInt32(value);
+                                                        con[i] = true;
+                                                        bool upp = true;
+                                                        for (int p = 0; p < 6;)
+                                                        {
+                                                            if (!con[p]) { upp = false; break; }
+                                                            p++;
+                                                        }
+                                                        if (upp)
+                                                        { dataClass.JointsOffsetValues = offsets; type = 0; }
+                                                        value = null;
+                                                        name = null;
+
+                                                    }
+                                                }
+                                                catch (Exception ex) { throw ex; }
+
+                                            }
+                                            else { break; }
+                                            i++;
+                                        }
+                                        break;
+
 
                                     default: break;
                                 }
@@ -3073,6 +3108,14 @@ namespace SDRAC
                     xw.WriteElementString("ssid", "");
                     xw.WriteElementString("pass", "");
                     xw.WriteEndElement();
+                    xw.WriteStartElement("Offsets", null);
+                    xw.WriteElementString("offset0", "0");
+                    xw.WriteElementString("offset1", "0");
+                    xw.WriteElementString("offset2", "0");
+                    xw.WriteElementString("offset3", "0");
+                    xw.WriteElementString("offset4", "0");
+                    xw.WriteElementString("offset5", "0");
+                    xw.WriteEndElement();
                     xw.WriteEndElement();
                 }
                 fs.Close();
@@ -3129,6 +3172,18 @@ namespace SDRAC
                     xw.WriteElementString("ssid", MainMenuForm.dataClass.Ssid);
                     xw.WriteElementString("pass", MainMenuForm.dataClass.Pass);
                     xw.WriteEndElement();
+
+
+                    xw.WriteStartElement("Offsets", null);
+                    i = 0;
+                    foreach (int item in MainMenuForm.dataClass.JointsOffsetValues)
+                    {
+                        xw.WriteElementString("offset" + i.ToString(), item.ToString());
+                        i++;
+                    }
+                    xw.WriteEndElement();
+
+
                     xw.WriteEndElement();
                     MessageBox.Show("Saved Setup","File",MessageBoxButtons.OK,MessageBoxIcon.Information);
                 }
@@ -3519,8 +3574,23 @@ namespace SDRAC
 
         private void pictureBox1_Click_1(object sender, EventArgs e)
         {
-            
 
+            int res = FunkscjaSkonczona(2000,-3000,4096);
+        }
+
+        private int FunkscjaSkonczona(int value, int vector_x, int resolution)
+        {
+            int X = value - vector_x;
+            int res = X % resolution;
+
+            if (res == 0) return 0;
+            if (res < 0) return resolution - res;
+            return res;
+        }
+
+        private int ReturnSignInt(int value)
+        {
+            return value / Math.Abs(value);
         }
 
         private void SimpleLan_ErrorIncomingEvent(object sender, Classes.SimpleLan.ErrorClass e)
@@ -3693,6 +3763,13 @@ namespace SDRAC
 
                             simpleLan.SendNewCommand(0, 40,false,2,dataLimits, true);
                          
+                        }
+
+                        if (MainMenuForm.dataClass.UpdateOffset)
+                        {
+                            MainMenuForm.dataClass.UpdateOffset = false;
+                            simpleLan.SendNewCommand(0, 41, false, 2, MainMenuForm.dataClass.JointsOffsetValues, true);
+
                         }
 
                         if (!MainMenuForm.dataClass.StopSend)

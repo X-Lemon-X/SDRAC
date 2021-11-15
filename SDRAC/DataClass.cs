@@ -13,11 +13,11 @@ namespace SDRAC
         stand = false, uploadAble = false, threads = false, threadMath = false, timer, stop = false, stopSend = false,
         ack = false, notack = false, connect = false, stopDon = true, busy = false, take = false, noPower = false, stopSended = false,
         aM = false, manualSend = true, forceCount = false, getConInfo = false, engError = false, errorStop = false, threadFileProblem = false, connectionAcomplished = false,
-        updateSetup = true, turnOffRobot=false;
+        updateSetup = true, turnOffRobot=false, updateOffset=false;
 
         private byte conectionType = 2;
         private string ip, mask, gate, port="25000", ssid, pass;
-        private int acceleration=8000, deacceleration = 8000, speed=100, maxAc, maxDe, a0=10,a1=250,a2,a3=20,rX,rY,rZ, frameType = 0, movementType,queLength=512, resolution=4096;
+        private int acceleration=8000, deacceleration = 8000, speed=100, maxAc, maxDe, a0=181,a1=250,a2,a3=20,rX,rY,rZ, frameType = 0, movementType,queLength=512, resolution=4096;
         private double a, maxRange=500, b, g,accuracy=0.0000000010000,jumpVector=10, veloAuto, velScale = 1, xL,yl,zL,rxL,ryL,rzL;
         private int missed=0, missedCur,modifi=0,stopC, stopB, stopD,stopE,curveShape=1;
         private byte[] errorNanoNum = new byte[20];
@@ -29,6 +29,7 @@ namespace SDRAC
         private int[] speedAuto = new int[8];
         private int[] speedSend = new int[6];
         private double[] joLimits = { 360,0, 360,0, 360,0, 180, -180, 180, -180, 180, -180 };
+        private int[] jointsOffsetValues = new int[6];
         private int[] joIN = new int[6];      
         private int[] joLast = new int[3];
         private string[] queueIN = new string[64];
@@ -115,6 +116,8 @@ namespace SDRAC
         
         public bool UpdateSetup { get => updateSetup; set => updateSetup = value; }
         public bool TurnOffRobot { get => turnOffRobot; set => turnOffRobot = value; }
+        public bool UpdateOffset { get => updateOffset; set => updateOffset = value; }
+        public int[] JointsOffsetValues { get => jointsOffsetValues; set => jointsOffsetValues = value; }
 
 
 
